@@ -1,3 +1,7 @@
+/* =========================================================
+   GLOBAL RESET
+   ========================================================= */
+
 * {
     margin: 0;
     padding: 0;
@@ -5,8 +9,13 @@
 }
 
 
+/* =========================================================
+   THEME
+   ========================================================= */
+
 :root {
     --background: #07111f;
+
     --card: #101c2e;
     --card-light: #17263b;
 
@@ -23,8 +32,11 @@
 }
 
 
-body {
+/* =========================================================
+   BODY
+   ========================================================= */
 
+body {
     min-height: 100vh;
 
     font-family:
@@ -51,8 +63,11 @@ button {
 }
 
 
-.container {
+/* =========================================================
+   MAIN CONTAINER
+   ========================================================= */
 
+.container {
     width: min(900px, 92%);
 
     margin: auto;
@@ -64,10 +79,11 @@ button {
 }
 
 
-/* HEADER */
+/* =========================================================
+   HEADER
+   ========================================================= */
 
 .header {
-
     text-align: center;
 
     margin-bottom: 35px;
@@ -75,7 +91,6 @@ button {
 
 
 .badge {
-
     display: inline-block;
 
     padding:
@@ -104,7 +119,6 @@ button {
     color: #67d7ff;
 
     font-size: 12px;
-
     font-weight: 700;
 
     letter-spacing: 1.4px;
@@ -112,7 +126,6 @@ button {
 
 
 .header h1 {
-
     margin-top: 20px;
 
     font-size:
@@ -127,7 +140,6 @@ button {
 
 
 .header p {
-
     max-width: 650px;
 
     margin:
@@ -143,11 +155,38 @@ button {
 }
 
 
-/* SCANNER CARD */
+/* =========================================================
+   FAMILY LOGO
+   ========================================================= */
+
+.brand-logo {
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    margin-bottom: 18px;
+}
+
+
+.brand-logo img {
+    display: block;
+
+    width: auto;
+
+    max-width: 220px;
+    max-height: 90px;
+
+    object-fit: contain;
+}
+
+
+/* =========================================================
+   SCANNER / RESULT CARDS
+   ========================================================= */
 
 .scanner-card,
 .results-section {
-
     background:
         rgba(
             16,
@@ -177,10 +216,11 @@ button {
 }
 
 
-/* UPLOAD */
+/* =========================================================
+   UPLOAD AREA
+   ========================================================= */
 
 .upload-area {
-
     padding:
         50px
         25px;
@@ -201,7 +241,6 @@ button {
 
 
 .upload-area.dragging {
-
     background:
         rgba(
             56,
@@ -219,7 +258,6 @@ button {
 
 
 .upload-icon {
-
     font-size: 55px;
 
     margin-bottom: 15px;
@@ -227,7 +265,6 @@ button {
 
 
 .upload-area h2 {
-
     font-size: 24px;
 
     margin-bottom: 10px;
@@ -235,15 +272,17 @@ button {
 
 
 .upload-area > p {
-
     color: var(--muted);
 
     line-height: 1.6;
 }
 
 
-.choose-btn {
+/* =========================================================
+   CHOOSE FILE BUTTON
+   ========================================================= */
 
+.choose-btn {
     margin-top: 22px;
 
     padding:
@@ -260,7 +299,6 @@ button {
     color: white;
 
     font-size: 15px;
-
     font-weight: 700;
 
     cursor: pointer;
@@ -270,7 +308,6 @@ button {
 
 
 .choose-btn:hover {
-
     background:
         #2d5d89;
 
@@ -279,8 +316,11 @@ button {
 }
 
 
-.supported-files {
+/* =========================================================
+   SUPPORTED FILES
+   ========================================================= */
 
+.supported-files {
     margin-top: 25px;
 
     color: var(--muted);
@@ -288,7 +328,6 @@ button {
 
 
 .supported-files strong {
-
     display: block;
 
     color: #cbd5e1;
@@ -298,7 +337,6 @@ button {
 
 
 .supported-files p {
-
     font-size: 13px;
 
     line-height: 1.7;
@@ -306,17 +344,17 @@ button {
 
 
 .supported-files small {
-
     display: block;
 
     margin-top: 6px;
 }
 
 
-/* SELECTED FILE */
+/* =========================================================
+   SELECTED FILE
+   ========================================================= */
 
 .selected-file {
-
     display: flex;
 
     align-items: center;
@@ -342,7 +380,6 @@ button {
 
 
 .selected-file-info {
-
     display: flex;
 
     align-items: center;
@@ -354,19 +391,16 @@ button {
 
 
 .selected-icon {
-
     font-size: 25px;
 }
 
 
 .selected-file-info div:last-child {
-
     min-width: 0;
 }
 
 
 .selected-file strong {
-
     display: block;
 
     overflow-wrap: anywhere;
@@ -374,7 +408,6 @@ button {
 
 
 .selected-file span {
-
     display: block;
 
     margin-top: 4px;
@@ -385,8 +418,11 @@ button {
 }
 
 
-.remove-btn {
+/* =========================================================
+   REMOVE FILE
+   ========================================================= */
 
+.remove-btn {
     border: none;
 
     background: transparent;
@@ -401,10 +437,11 @@ button {
 }
 
 
-/* SCAN BUTTON */
+/* =========================================================
+   SCAN BUTTON
+   ========================================================= */
 
 .scan-btn {
-
     width: 100%;
 
     margin-top: 20px;
@@ -425,7 +462,6 @@ button {
     color: white;
 
     font-size: 16px;
-
     font-weight: 750;
 
     cursor: pointer;
@@ -435,7 +471,6 @@ button {
 
 
 .scan-btn:hover:not(:disabled) {
-
     transform:
         translateY(-2px);
 
@@ -453,17 +488,17 @@ button {
 
 
 .scan-btn:disabled {
-
     opacity: 0.4;
 
     cursor: not-allowed;
 }
 
 
-/* PROCESSING */
+/* =========================================================
+   PROCESSING
+   ========================================================= */
 
 .processing {
-
     margin-top: 25px;
 
     padding:
@@ -476,9 +511,7 @@ button {
 
 
 .spinner {
-
     width: 45px;
-
     height: 45px;
 
     margin:
@@ -509,28 +542,27 @@ button {
         transform:
             rotate(360deg);
     }
-
 }
 
 
 .processing h3 {
-
     margin-bottom: 7px;
 }
 
 
 .processing p {
-
     color: var(--muted);
 
     margin-bottom: 18px;
 }
 
 
+/* =========================================================
+   PROGRESS BAR
+   ========================================================= */
+
 .progress-container {
-
     width: 100%;
-
     height: 8px;
 
     overflow: hidden;
@@ -543,9 +575,7 @@ button {
 
 
 .progress-bar {
-
     width: 0%;
-
     height: 100%;
 
     border-radius: 20px;
@@ -564,10 +594,11 @@ button {
 }
 
 
-/* ERRORS */
+/* =========================================================
+   ERROR MESSAGE
+   ========================================================= */
 
 .error-message {
-
     margin-top: 20px;
 
     padding: 14px;
@@ -598,16 +629,16 @@ button {
 }
 
 
-/* RESULTS */
+/* =========================================================
+   RESULTS
+   ========================================================= */
 
 .results-section {
-
     margin-top: 25px;
 }
 
 
 .results-header {
-
     display: flex;
 
     align-items: center;
@@ -622,12 +653,10 @@ button {
 
 
 .results-label {
-
     color:
         var(--success);
 
     font-size: 11px;
-
     font-weight: 800;
 
     letter-spacing: 1.3px;
@@ -635,13 +664,15 @@ button {
 
 
 .results-header h2 {
-
     margin-top: 5px;
 }
 
 
-.download-btn {
+/* =========================================================
+   DOWNLOAD BUTTON
+   ========================================================= */
 
+.download-btn {
     padding:
         11px
         16px;
@@ -658,11 +689,25 @@ button {
     color: white;
 
     cursor: pointer;
+
+    transition: 0.2s;
 }
 
 
-.classification-grid {
+.download-btn:hover {
+    background:
+        #274a6d;
 
+    transform:
+        translateY(-1px);
+}
+
+
+/* =========================================================
+   CLASSIFICATION
+   ========================================================= */
+
+.classification-grid {
     display: grid;
 
     grid-template-columns:
@@ -678,7 +723,6 @@ button {
 
 
 .classification-card {
-
     padding: 20px;
 
     border:
@@ -693,7 +737,6 @@ button {
 
 
 .classification-card span {
-
     display: block;
 
     margin-bottom: 10px;
@@ -705,27 +748,27 @@ button {
 
 
 .classification-card strong {
-
     font-size: 17px;
 
     overflow-wrap: anywhere;
 }
 
 
-.information-section {
+/* =========================================================
+   EXTRACTED INFORMATION
+   ========================================================= */
 
+.information-section {
     margin-top: 25px;
 }
 
 
 .information-section h3 {
-
     margin-bottom: 15px;
 }
 
 
 .extracted-fields {
-
     border-top:
         1px solid
         var(--border);
@@ -733,7 +776,6 @@ button {
 
 
 .extracted-field {
-
     display: grid;
 
     grid-template-columns:
@@ -753,7 +795,6 @@ button {
 
 
 .field-name {
-
     color: var(--muted);
 
     font-size: 13px;
@@ -763,7 +804,6 @@ button {
 
 
 .field-value {
-
     color: var(--text);
 
     white-space: pre-wrap;
@@ -772,8 +812,11 @@ button {
 }
 
 
-.additional-notes {
+/* =========================================================
+   ADDITIONAL NOTES
+   ========================================================= */
 
+.additional-notes {
     color: var(--muted);
 
     line-height: 1.7;
@@ -782,10 +825,440 @@ button {
 }
 
 
-/* FOOTER */
+/* =========================================================
+   EDUCATION / MARKSHEET TABLE
+   ========================================================= */
+
+.marksheet-table-container {
+    width: 100%;
+
+    margin-top: 20px;
+    margin-bottom: 28px;
+}
+
+
+.marksheet-table-title {
+    margin-bottom: 12px;
+
+    font-size: 15px;
+    font-weight: 600;
+}
+
+
+.marks-table-wrapper {
+    width: 100%;
+
+    overflow-x: auto;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.08
+        );
+
+    border-radius: 10px;
+
+    -webkit-overflow-scrolling: touch;
+}
+
+
+.marks-table {
+    width: 100%;
+
+    min-width: 750px;
+
+    border-collapse: collapse;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.02
+        );
+}
+
+
+.marks-table thead {
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.07
+        );
+}
+
+
+.marks-table th {
+    padding:
+        14px
+        15px;
+
+    text-align: center;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.4px;
+
+    white-space: nowrap;
+
+    border-bottom:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.12
+        );
+}
+
+
+.marks-table td {
+    padding:
+        14px
+        15px;
+
+    text-align: center;
+
+    font-size: 14px;
+
+    white-space: nowrap;
+
+    border-bottom:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.07
+        );
+}
+
+
+/* Subject column */
+
+.marks-table th:nth-child(2),
+.marks-table td:nth-child(2) {
+    min-width: 200px;
+
+    text-align: left;
+}
+
+
+.marks-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+
+.marks-table tbody tr:hover {
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.035
+        );
+}
+
+
+/* =========================================================
+   PHYSICAL CHARACTERISTICS
+   ========================================================= */
+
+.physical-characteristics-container {
+    width: 100%;
+
+    margin-top: 20px;
+    margin-bottom: 26px;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.08
+        );
+
+    border-radius: 10px;
+
+    overflow: hidden;
+}
+
+
+.physical-characteristics-title {
+    padding:
+        14px
+        18px;
+
+    font-size: 15px;
+    font-weight: 600;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.05
+        );
+
+    border-bottom:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.08
+        );
+}
+
+
+.physical-characteristic-row {
+    display: grid;
+
+    grid-template-columns:
+        240px
+        1fr;
+
+    gap: 20px;
+
+    padding:
+        15px
+        18px;
+
+    border-bottom:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.08
+        );
+}
+
+
+.physical-characteristic-label {
+    color: var(--muted);
+
+    font-size: 14px;
+}
+
+
+.physical-characteristic-value {
+    color: var(--text);
+
+    font-size: 14px;
+
+    overflow-wrap: anywhere;
+}
+
+
+.physical-characteristic-row:last-child {
+    border-bottom: none;
+}
+
+
+/* =========================================================
+   EXECUTION DETAILS
+   ========================================================= */
+
+.execution-details-container {
+    width: 100%;
+
+    margin-top: 32px;
+
+    padding-top: 22px;
+
+    border-top:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.12
+        );
+}
+
+
+.execution-details-title {
+    margin-bottom: 14px;
+
+    font-size: 17px;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   EXECUTION TABLE WRAPPER
+   ========================================================= */
+
+.execution-table-wrapper {
+    width: 100%;
+
+    overflow-x: auto;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.10
+        );
+
+    border-radius: 10px;
+
+    -webkit-overflow-scrolling: touch;
+}
+
+
+/* =========================================================
+   EXECUTION TABLE
+   ========================================================= */
+
+.execution-table {
+    width: 100%;
+
+    min-width: 950px;
+
+    border-collapse: collapse;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.02
+        );
+}
+
+
+/* =========================================================
+   EXECUTION TABLE HEADER
+   ========================================================= */
+
+.execution-table thead {
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.07
+        );
+}
+
+
+.execution-table th {
+    padding:
+        14px
+        16px;
+
+    text-align: center;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.4px;
+
+    white-space: nowrap;
+
+    color: var(--text);
+
+    border-right:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.08
+        );
+
+    border-bottom:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.12
+        );
+}
+
+
+.execution-table th:last-child {
+    border-right: none;
+}
+
+
+/* =========================================================
+   EXECUTION TABLE VALUES
+   ========================================================= */
+
+.execution-table td {
+    padding: 16px;
+
+    text-align: center;
+
+    font-size: 14px;
+
+    white-space: nowrap;
+
+    color: var(--text);
+
+    border-right:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.06
+        );
+}
+
+
+.execution-table td:last-child {
+    border-right: none;
+}
+
+
+/* Model ID */
+
+.execution-table td:first-child {
+    min-width: 230px;
+
+    white-space: normal;
+
+    word-break: break-word;
+
+    font-weight: 500;
+
+    color:
+        #67d7ff;
+}
+
+
+/* Token values */
+
+.execution-table td:nth-child(2),
+.execution-table td:nth-child(3),
+.execution-table td:nth-child(4) {
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
 
 .footer {
-
     padding-top: 35px;
 
     text-align: center;
@@ -795,7 +1268,6 @@ button {
 
 
 .footer p {
-
     margin-bottom: 5px;
 
     color: #b7c6d9;
@@ -805,25 +1277,64 @@ button {
 
 
 .footer span {
-
     font-size: 11px;
 }
 
 
-/* GENERAL */
+/* =========================================================
+   GENERAL
+   ========================================================= */
 
 .hidden {
-
     display: none !important;
 }
 
 
-@media (
-    max-width: 650px
-) {
+/* =========================================================
+   SCROLLBARS FOR TABLES
+   ========================================================= */
+
+.marks-table-wrapper::-webkit-scrollbar,
+.execution-table-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+
+
+.marks-table-wrapper::-webkit-scrollbar-track,
+.execution-table-wrapper::-webkit-scrollbar-track {
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.03
+        );
+}
+
+
+.marks-table-wrapper::-webkit-scrollbar-thumb,
+.execution-table-wrapper::-webkit-scrollbar-thumb {
+    background:
+        #3d5878;
+
+    border-radius: 20px;
+}
+
+
+.marks-table-wrapper::-webkit-scrollbar-thumb:hover,
+.execution-table-wrapper::-webkit-scrollbar-thumb:hover {
+    background:
+        var(--primary);
+}
+
+
+/* =========================================================
+   TABLET / MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
 
     .container {
-
         width: 94%;
 
         padding-top: 25px;
@@ -832,7 +1343,6 @@ button {
 
     .scanner-card,
     .results-section {
-
         padding: 17px;
 
         border-radius: 16px;
@@ -840,7 +1350,6 @@ button {
 
 
     .upload-area {
-
         padding:
             35px
             15px;
@@ -848,14 +1357,12 @@ button {
 
 
     .classification-grid {
-
         grid-template-columns:
             1fr;
     }
 
 
     .results-header {
-
         align-items:
             flex-start;
 
@@ -865,334 +1372,116 @@ button {
 
 
     .extracted-field {
-
         grid-template-columns:
             1fr;
 
         gap: 7px;
     }
 
-}
-/* Family logo at top of scanner */
 
-.brand-logo {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 18px;
-}
+    /* FAMILY LOGO */
 
-.brand-logo img {
-    display: block;
-    width: auto;
-    max-width: 220px;
-    max-height: 90px;
-    object-fit: contain;
-}
-/* =========================================================
-   UNIVERSAL 10TH / 12TH MARKSHEET TABLE
-   ========================================================= */
+    .brand-logo img {
+        max-width: 180px;
 
-.marksheet-table-container {
-    width: 100%;
-    margin-top: 14px;
-    margin-bottom: 24px;
-}
-
-.marksheet-table-title {
-    margin-bottom: 12px;
-    font-size: 14px;
-    font-weight: 500;
-    opacity: 0.8;
-}
-
-.marks-table-wrapper {
-    width: 100%;
-    overflow-x: auto;
-    border-radius: 10px;
-}
-
-.marks-table {
-    width: 100%;
-    min-width: 720px;
-    border-collapse: collapse;
-    border-spacing: 0;
-    background: rgba(255, 255, 255, 0.02);
-}
-
-.marks-table thead {
-    background: rgba(255, 255, 255, 0.06);
-}
-
-.marks-table th {
-    padding: 14px 16px;
-    text-align: center;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    white-space: nowrap;
-
-    border-bottom:
-        1px solid rgba(255, 255, 255, 0.12);
-}
-
-.marks-table td {
-    padding: 14px 16px;
-    text-align: center;
-    font-size: 14px;
-    white-space: nowrap;
-
-    border-bottom:
-        1px solid rgba(255, 255, 255, 0.08);
-}
-
-.marks-table th:nth-child(2),
-.marks-table td:nth-child(2) {
-    min-width: 210px;
-    text-align: left;
-}
-
-.marks-table tbody tr:last-child td {
-    border-bottom: none;
-}
-
-.marks-table tbody tr:hover {
-    background: rgba(255, 255, 255, 0.035);
-}
-
-/* =========================================================
-   UNIVERSAL EDUCATION MARKSHEET TABLE
-   ========================================================= */
-
-.marksheet-table-container {
-    width: 100%;
-    margin-top: 18px;
-    margin-bottom: 28px;
-}
-
-.marksheet-table-title {
-    margin-bottom: 12px;
-    font-size: 15px;
-    font-weight: 600;
-}
-
-.marks-table-wrapper {
-    width: 100%;
-    overflow-x: auto;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.marks-table {
-    width: 100%;
-    min-width: 750px;
-    border-collapse: collapse;
-    background: rgba(255, 255, 255, 0.02);
-}
-
-.marks-table thead {
-    background: rgba(255, 255, 255, 0.07);
-}
-
-.marks-table th {
-    padding: 14px 15px;
-    text-align: center;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    white-space: nowrap;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.marks-table td {
-    padding: 14px 15px;
-    text-align: center;
-    font-size: 14px;
-    white-space: nowrap;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-}
-
-.marks-table tbody tr:last-child td {
-    border-bottom: none;
-}
-
-.marks-table tbody tr:hover {
-    background: rgba(255, 255, 255, 0.035);
-}
-
-/* Subject name should have more room */
-
-.marks-table th:nth-child(2),
-.marks-table td:nth-child(2) {
-    min-width: 200px;
-    text-align: left;
-}
+        max-height: 75px;
+    }
 
 
-/* =========================================================
-   MOBILE
-   ========================================================= */
+    /* PHYSICAL CHARACTERISTICS */
 
-@media (max-width: 700px) {
+    .physical-characteristic-row {
+        grid-template-columns:
+            1fr;
+
+        gap: 6px;
+    }
+
+
+    /* MARKSHEET */
 
     .marks-table {
         min-width: 680px;
     }
 
+
     .marks-table th,
     .marks-table td {
-        padding: 11px 10px;
+        padding:
+            11px
+            10px;
+
         font-size: 12px;
     }
+
 
     .marks-table th:nth-child(2),
     .marks-table td:nth-child(2) {
         min-width: 160px;
     }
-}
-/* =========================================================
-   PHYSICAL CHARACTERISTICS
-   ========================================================= */
-
-.physical-characteristics-container {
-    width: 100%;
-    margin-top: 20px;
-    margin-bottom: 26px;
-}
-
-.physical-characteristics-title {
-    font-size: 15px;
-    font-weight: 600;
-    margin-bottom: 12px;
-}
-
-.physical-characteristic-row {
-    display: grid;
-    grid-template-columns: 240px 1fr;
-    gap: 20px;
-
-    padding: 15px 18px;
-
-    border-bottom:
-        1px solid rgba(255, 255, 255, 0.08);
-}
-
-.physical-characteristic-label {
-    font-size: 14px;
-    opacity: 0.7;
-}
-
-.physical-characteristic-value {
-    font-size: 14px;
-}
-
-.physical-characteristic-row:last-child {
-    border-bottom: none;
-}
 
 
-/* =========================================================
-   UNIVERSAL EDUCATION TABLE
-   ========================================================= */
+    /* EXECUTION TABLE */
 
-.marksheet-table-container {
-    width: 100%;
-    margin-top: 18px;
-    margin-bottom: 28px;
-}
-
-.marksheet-table-title {
-    margin-bottom: 12px;
-    font-size: 15px;
-    font-weight: 600;
-}
-
-.marks-table-wrapper {
-    width: 100%;
-    overflow-x: auto;
-
-    border-radius: 10px;
-
-    border:
-        1px solid rgba(255, 255, 255, 0.08);
-}
-
-.marks-table {
-    width: 100%;
-    min-width: 750px;
-
-    border-collapse: collapse;
-
-    background:
-        rgba(255, 255, 255, 0.02);
-}
-
-.marks-table thead {
-    background:
-        rgba(255, 255, 255, 0.07);
-}
-
-.marks-table th {
-    padding: 14px 15px;
-
-    text-align: center;
-
-    font-size: 12px;
-    font-weight: 600;
-
-    text-transform: uppercase;
-
-    letter-spacing: 0.4px;
-
-    white-space: nowrap;
-
-    border-bottom:
-        1px solid rgba(255, 255, 255, 0.12);
-}
-
-.marks-table td {
-    padding: 14px 15px;
-
-    text-align: center;
-
-    font-size: 14px;
-
-    white-space: nowrap;
-
-    border-bottom:
-        1px solid rgba(255, 255, 255, 0.07);
-}
-
-.marks-table tbody tr:last-child td {
-    border-bottom: none;
-}
-
-.marks-table tbody tr:hover {
-    background:
-        rgba(255, 255, 255, 0.035);
-}
-
-
-/* =========================================================
-   MOBILE
-   ========================================================= */
-
-@media (max-width: 700px) {
-
-    .physical-characteristic-row {
-        grid-template-columns: 1fr;
-        gap: 6px;
+    .execution-table {
+        min-width: 850px;
     }
 
-    .marks-table {
-        min-width: 680px;
+
+    .execution-table th {
+        padding:
+            11px
+            12px;
+
+        font-size: 11px;
     }
 
-    .marks-table th,
-    .marks-table td {
-        padding: 11px 10px;
+
+    .execution-table td {
+        padding:
+            13px
+            12px;
+
         font-size: 12px;
+    }
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 450px) {
+
+    .container {
+        width: 96%;
+    }
+
+
+    .header p {
+        font-size: 14px;
+    }
+
+
+    .upload-area h2 {
+        font-size: 20px;
+    }
+
+
+    .selected-file {
+        align-items:
+            flex-start;
+    }
+
+
+    .classification-card {
+        padding: 16px;
+    }
+
+
+    .execution-details-title,
+    .marksheet-table-title,
+    .physical-characteristics-title {
+        font-size: 14px;
     }
 }

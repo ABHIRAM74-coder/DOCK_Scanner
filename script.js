@@ -95,9 +95,7 @@ const downloadBtn =
 // =========================================================
 
 let currentFile = null;
-
 let latestResult = null;
-
 let latestExecution = null;
 
 
@@ -625,7 +623,7 @@ scanBtn.addEventListener(
 
 
             // =================================================
-            // LAMBDA PROXY BODY
+            // LAMBDA PROXY RESPONSE
             // =================================================
 
             if (
@@ -875,7 +873,7 @@ function displayResults(
 
 
             // =================================================
-            // EDUCATION SUBJECTS
+            // EDUCATION SUBJECT TABLE
             // =================================================
 
             if (
@@ -894,6 +892,10 @@ function displayResults(
             }
 
 
+            // =================================================
+            // NORMAL FIELD
+            // =================================================
+
             displayNormalField(
                 key,
                 value
@@ -903,7 +905,7 @@ function displayResults(
 
 
     // =====================================================
-    // EXECUTION INFORMATION AT VERY BOTTOM
+    // EXECUTION TABLE AT BOTTOM
     // =====================================================
 
     if (
@@ -1120,7 +1122,7 @@ function displayPhysicalCharacteristics(
 
 
 // =========================================================
-// EDUCATION DETECTION
+// EDUCATION SUBJECT DETECTION
 // =========================================================
 
 function isEducationSubjectCollection(
@@ -1143,6 +1145,10 @@ function isEducationSubjectCollection(
             key
         );
 
+
+    // =====================================================
+    // NEVER TREAT THESE AS SUBJECTS
+    // =====================================================
 
     const nonAcademicFields =
         new Set([
@@ -1177,6 +1183,10 @@ function isEducationSubjectCollection(
         return false;
     }
 
+
+    // =====================================================
+    // KNOWN ACADEMIC COLLECTIONS
+    // =====================================================
 
     const knownSubjectKeys =
         new Set([
@@ -1287,7 +1297,7 @@ function isEducationSubjectCollection(
 
 
 // =========================================================
-// EDUCATION TABLE
+// UNIVERSAL EDUCATION TABLE
 // =========================================================
 
 function renderEducationTable(
@@ -1440,7 +1450,8 @@ function renderEducationTable(
                 "maximum_marks",
                 "maxMarks",
                 "max_marks",
-                "maximum"
+                "maximum",
+                "totalMaximumMarks"
             ]
         },
 
@@ -1482,7 +1493,8 @@ function renderEducationTable(
                 "marks_in_words",
                 "totalInWords",
                 "total_in_words",
-                "obtainedMarksInWords"
+                "obtainedMarksInWords",
+                "obtained_marks_in_words"
             ]
         },
 
@@ -1514,6 +1526,10 @@ function renderEducationTable(
         }
     ];
 
+
+    // =====================================================
+    // ONLY SHOW COLUMNS THAT CONTAIN DATA
+    // =====================================================
 
     const activeColumns =
         definitions.filter(
@@ -1567,6 +1583,10 @@ function renderEducationTable(
         "marks-table";
 
 
+    // =====================================================
+    // HEADER
+    // =====================================================
+
     const thead =
         document.createElement(
             "thead"
@@ -1608,6 +1628,10 @@ function renderEducationTable(
         thead
     );
 
+
+    // =====================================================
+    // BODY
+    // =====================================================
 
     const tbody =
         document.createElement(
@@ -1707,6 +1731,10 @@ function normalizeEducationRows(
     value
 ) {
 
+    // =====================================================
+    // ARRAY FORMAT
+    // =====================================================
+
     if (
         Array.isArray(
             value
@@ -1761,6 +1789,10 @@ function normalizeEducationRows(
     }
 
 
+    // =====================================================
+    // OBJECT FORMAT
+    // =====================================================
+
     if (
         value &&
         typeof value ===
@@ -1814,7 +1846,7 @@ function normalizeEducationRows(
 
 
 // =========================================================
-// ALIAS VALUE
+// GET ALIAS VALUE
 // =========================================================
 
 function getAliasValue(
@@ -1973,7 +2005,7 @@ function displayNormalField(
 
 
 // =========================================================
-// OBJECT FORMAT
+// FORMAT OBJECT VALUE
 // =========================================================
 
 function formatObjectValue(
@@ -2051,6 +2083,24 @@ function formatObjectValue(
                 ]
             ) {
 
+                if (
+                    val &&
+                    typeof val ===
+                        "object"
+                ) {
+
+                    return (
+                        formatFieldName(
+                            key
+                        ) +
+                        ": " +
+                        JSON.stringify(
+                            val
+                        )
+                    );
+                }
+
+
                 return (
                     formatFieldName(
                         key
@@ -2070,7 +2120,7 @@ function formatObjectValue(
 
 
 // =========================================================
-// EXECUTION DETAILS
+// EXECUTION DETAILS TABLE
 // =========================================================
 
 function displayExecutionDetails(
@@ -2086,6 +2136,10 @@ function displayExecutionDetails(
     container.className =
         "execution-details-container";
 
+
+    // =====================================================
+    // TITLE
+    // =====================================================
 
     const title =
         document.createElement(
@@ -2106,111 +2160,176 @@ function displayExecutionDetails(
     );
 
 
-    const details = [
+    // =====================================================
+    // TABLE WRAPPER
+    // =====================================================
 
-        [
-            "Model",
-            execution.modelId ||
-            "Unknown"
-        ],
+    const wrapper =
+        document.createElement(
+            "div"
+        );
 
-        [
-            "Input Tokens",
-            formatNumber(
-                execution.inputTokens
-            )
-        ],
 
-        [
-            "Output Tokens",
-            formatNumber(
-                execution.outputTokens
-            )
-        ],
+    wrapper.className =
+        "execution-table-wrapper";
 
-        [
-            "Total Tokens",
-            formatNumber(
-                execution.totalTokens
-            )
-        ],
 
-        [
-            "Model Processing Time",
-            formatDuration(
-                execution.modelLatencyMs
-            )
-        ],
+    // =====================================================
+    // TABLE
+    // =====================================================
 
-        [
-            "Total Execution Time",
-            formatDuration(
-                execution.totalExecutionMs
-            )
-        ]
+    const table =
+        document.createElement(
+            "table"
+        );
+
+
+    table.className =
+        "execution-table";
+
+
+    // =====================================================
+    // HEADER
+    // =====================================================
+
+    const thead =
+        document.createElement(
+            "thead"
+        );
+
+
+    const headerRow =
+        document.createElement(
+            "tr"
+        );
+
+
+    const headers = [
+
+        "Model",
+
+        "Input Tokens",
+
+        "Output Tokens",
+
+        "Total Tokens",
+
+        "Model Processing Time",
+
+        "Total Execution Time"
     ];
 
 
-    details.forEach(
-        function (
-            [
-                labelText,
-                valueText
-            ]
-        ) {
+    headers.forEach(
+        function (header) {
 
-            const row =
+            const th =
                 document.createElement(
-                    "div"
+                    "th"
                 );
 
 
-            row.className =
-                "execution-detail-row";
+            th.textContent =
+                header;
 
 
-            const label =
-                document.createElement(
-                    "div"
-                );
-
-
-            label.className =
-                "execution-detail-label";
-
-
-            label.textContent =
-                labelText;
-
-
-            const value =
-                document.createElement(
-                    "div"
-                );
-
-
-            value.className =
-                "execution-detail-value";
-
-
-            value.textContent =
-                valueText;
-
-
-            row.appendChild(
-                label
-            );
-
-
-            row.appendChild(
-                value
-            );
-
-
-            container.appendChild(
-                row
+            headerRow.appendChild(
+                th
             );
         }
+    );
+
+
+    thead.appendChild(
+        headerRow
+    );
+
+
+    table.appendChild(
+        thead
+    );
+
+
+    // =====================================================
+    // DATA
+    // =====================================================
+
+    const tbody =
+        document.createElement(
+            "tbody"
+        );
+
+
+    const dataRow =
+        document.createElement(
+            "tr"
+        );
+
+
+    const values = [
+
+        execution.modelId ||
+            "Unknown",
+
+        formatNumber(
+            execution.inputTokens
+        ),
+
+        formatNumber(
+            execution.outputTokens
+        ),
+
+        formatNumber(
+            execution.totalTokens
+        ),
+
+        formatDuration(
+            execution.modelLatencyMs
+        ),
+
+        formatDuration(
+            execution.totalExecutionMs
+        )
+    ];
+
+
+    values.forEach(
+        function (value) {
+
+            const td =
+                document.createElement(
+                    "td"
+                );
+
+
+            td.textContent =
+                value;
+
+
+            dataRow.appendChild(
+                td
+            );
+        }
+    );
+
+
+    tbody.appendChild(
+        dataRow
+    );
+
+
+    table.appendChild(
+        tbody
+    );
+
+
+    wrapper.appendChild(
+        table
+    );
+
+
+    container.appendChild(
+        wrapper
     );
 
 
