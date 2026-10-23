@@ -1,12 +1,22 @@
 "use strict";
 
 /* =========================================================
-   FAMILY DOCUMENT SCANNER
-   Frontend → API Gateway → Lambda → Amazon Bedrock
+   FAMILY DOCUMENT AI SCANNER
+   Frontend → API Gateway → Lambda → Amazon Bedrock Nova
    ========================================================= */
+
+
+// =========================================================
+// API CONFIGURATION
+// =========================================================
 
 const API_URL =
     "https://bcuo2i0zhb.execute-api.ap-southeast-2.amazonaws.com/scan";
+
+
+// =========================================================
+// FILE CONFIGURATION
+// =========================================================
 
 const ALLOWED_EXTENSIONS = new Set([
     "pdf",
@@ -17,90 +27,181 @@ const ALLOWED_EXTENSIONS = new Set([
     "png"
 ]);
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_FILE_SIZE =
+    10 * 1024 * 1024;
 
 
 // =========================================================
-// ELEMENTS
+// HTML ELEMENTS
 // =========================================================
 
-const fileInput = document.getElementById("fileInput");
-const chooseFileBtn = document.getElementById("chooseFileBtn");
-const dropArea = document.getElementById("dropArea");
-const selectedFile = document.getElementById("selectedFile");
-const fileName = document.getElementById("fileName");
-const fileSize = document.getElementById("fileSize");
-const removeFileBtn = document.getElementById("removeFileBtn");
-const scanBtn = document.getElementById("scanBtn");
-const errorMessage = document.getElementById("errorMessage");
-const processingSection = document.getElementById("processingSection");
-const processingText = document.getElementById("processingText");
-const progressBar = document.getElementById("progressBar");
-const resultsSection = document.getElementById("resultsSection");
-const categoryResult = document.getElementById("categoryResult");
-const documentTypeResult = document.getElementById("documentTypeResult");
-const extractedFields = document.getElementById("extractedFields");
-const additionalNotes = document.getElementById("additionalNotes");
-const downloadBtn = document.getElementById("downloadBtn");
+const fileInput =
+    document.getElementById("fileInput");
+
+const chooseFileBtn =
+    document.getElementById("chooseFileBtn");
+
+const dropArea =
+    document.getElementById("dropArea");
+
+const selectedFile =
+    document.getElementById("selectedFile");
+
+const fileName =
+    document.getElementById("fileName");
+
+const fileSize =
+    document.getElementById("fileSize");
+
+const removeFileBtn =
+    document.getElementById("removeFileBtn");
+
+const scanBtn =
+    document.getElementById("scanBtn");
+
+const errorMessage =
+    document.getElementById("errorMessage");
+
+const processingSection =
+    document.getElementById("processingSection");
+
+const processingText =
+    document.getElementById("processingText");
+
+const progressBar =
+    document.getElementById("progressBar");
+
+const resultsSection =
+    document.getElementById("resultsSection");
+
+const categoryResult =
+    document.getElementById("categoryResult");
+
+const documentTypeResult =
+    document.getElementById("documentTypeResult");
+
+const extractedFields =
+    document.getElementById("extractedFields");
+
+const additionalNotes =
+    document.getElementById("additionalNotes");
+
+const downloadBtn =
+    document.getElementById("downloadBtn");
+
+
+// =========================================================
+// STATE
+// =========================================================
 
 let currentFile = null;
 let latestResult = null;
 
 
 // =========================================================
-// FILE PICKER
+// CHOOSE FILE
 // =========================================================
 
-chooseFileBtn.addEventListener("click", () => {
-    fileInput.click();
-});
+chooseFileBtn.addEventListener(
+    "click",
+    function () {
 
-fileInput.addEventListener("change", () => {
-
-    if (fileInput.files?.length) {
-        handleFile(fileInput.files[0]);
+        fileInput.click();
     }
-});
+);
 
 
 // =========================================================
-// DRAG & DROP
+// FILE INPUT
 // =========================================================
 
-["dragenter", "dragover"].forEach(eventName => {
+fileInput.addEventListener(
+    "change",
+    function () {
 
-    dropArea.addEventListener(eventName, event => {
+        if (
+            fileInput.files &&
+            fileInput.files.length > 0
+        ) {
 
-        event.preventDefault();
-        event.stopPropagation();
-
-        dropArea.classList.add("dragging");
-    });
-});
-
-["dragleave", "drop"].forEach(eventName => {
-
-    dropArea.addEventListener(eventName, event => {
-
-        event.preventDefault();
-        event.stopPropagation();
-
-        dropArea.classList.remove("dragging");
-    });
-});
-
-dropArea.addEventListener("drop", event => {
-
-    const files = event.dataTransfer.files;
-
-    if (files?.length) {
-        handleFile(files[0]);
+            handleFile(
+                fileInput.files[0]
+            );
+        }
     }
-});
+);
 
 
 // =========================================================
-// VALIDATE FILE
+// DRAG AND DROP
+// =========================================================
+
+[
+    "dragenter",
+    "dragover"
+].forEach(
+    function (eventName) {
+
+        dropArea.addEventListener(
+            eventName,
+            function (event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                dropArea.classList.add(
+                    "dragging"
+                );
+            }
+        );
+    }
+);
+
+
+[
+    "dragleave",
+    "drop"
+].forEach(
+    function (eventName) {
+
+        dropArea.addEventListener(
+            eventName,
+            function (event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                dropArea.classList.remove(
+                    "dragging"
+                );
+            }
+        );
+    }
+);
+
+
+dropArea.addEventListener(
+    "drop",
+    function (event) {
+
+        const files =
+            event.dataTransfer.files;
+
+        if (
+            files &&
+            files.length > 0
+        ) {
+
+            handleFile(
+                files[0]
+            );
+        }
+    }
+);
+
+
+// =========================================================
+// HANDLE FILE
 // =========================================================
 
 function handleFile(file) {
@@ -108,299 +209,503 @@ function handleFile(file) {
     clearError();
     hideResults();
 
-    const extension = getFileExtension(file.name);
+    const extension =
+        getFileExtension(
+            file.name
+        );
 
-    if (!ALLOWED_EXTENSIONS.has(extension)) {
+
+    if (
+        !ALLOWED_EXTENSIONS.has(
+            extension
+        )
+    ) {
 
         showError(
             "Unsupported file type. Supported formats: PDF, DOCX, TXT, JPG, JPEG and PNG."
         );
 
         resetFile();
+
         return;
     }
 
-    if (file.size === 0) {
 
-        showError("The selected file is empty.");
+    if (
+        file.size === 0
+    ) {
+
+        showError(
+            "The selected file is empty."
+        );
 
         resetFile();
+
         return;
     }
 
-    if (file.size > MAX_FILE_SIZE) {
+
+    if (
+        file.size >
+        MAX_FILE_SIZE
+    ) {
 
         showError(
             "The selected file exceeds the 10 MB limit."
         );
 
         resetFile();
+
         return;
     }
 
-    currentFile = file;
 
-    fileName.textContent = file.name;
-    fileSize.textContent = formatFileSize(file.size);
+    currentFile =
+        file;
 
-    selectedFile.classList.remove("hidden");
 
-    scanBtn.disabled = false;
+    fileName.textContent =
+        file.name;
+
+
+    fileSize.textContent =
+        formatFileSize(
+            file.size
+        );
+
+
+    selectedFile.classList.remove(
+        "hidden"
+    );
+
+
+    scanBtn.disabled =
+        false;
 }
 
+
+// =========================================================
+// GET EXTENSION
+// =========================================================
 
 function getFileExtension(name) {
 
-    const pieces = name.toLowerCase().split(".");
+    const pieces =
+        name
+            .toLowerCase()
+            .split(".");
 
-    return pieces.length > 1
-        ? pieces.pop()
-        : "";
+
+    if (
+        pieces.length < 2
+    ) {
+
+        return "";
+    }
+
+
+    return pieces.pop();
 }
 
+
+// =========================================================
+// FORMAT FILE SIZE
+// =========================================================
 
 function formatFileSize(bytes) {
 
-    if (bytes < 1024) {
-        return `${bytes} bytes`;
+    if (
+        bytes < 1024
+    ) {
+
+        return (
+            bytes +
+            " bytes"
+        );
     }
 
-    if (bytes < 1024 * 1024) {
-        return `${(bytes / 1024).toFixed(2)} KB`;
+
+    if (
+        bytes <
+        1024 * 1024
+    ) {
+
+        return (
+            (
+                bytes /
+                1024
+            ).toFixed(2) +
+            " KB"
+        );
     }
 
-    return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+
+    return (
+        (
+            bytes /
+            1024 /
+            1024
+        ).toFixed(2) +
+        " MB"
+    );
 }
 
 
 // =========================================================
-// RESET
+// REMOVE FILE
 // =========================================================
 
-removeFileBtn.addEventListener("click", () => {
+removeFileBtn.addEventListener(
+    "click",
+    function () {
 
-    resetFile();
-    clearError();
-    hideResults();
-});
+        resetFile();
+        clearError();
+        hideResults();
+    }
+);
 
+
+// =========================================================
+// RESET FILE
+// =========================================================
 
 function resetFile() {
 
-    currentFile = null;
-    latestResult = null;
+    currentFile =
+        null;
 
-    fileInput.value = "";
+    latestResult =
+        null;
 
-    fileName.textContent = "";
-    fileSize.textContent = "";
 
-    selectedFile.classList.add("hidden");
+    fileInput.value =
+        "";
 
-    scanBtn.disabled = true;
 
-    processingSection.classList.add("hidden");
+    fileName.textContent =
+        "";
 
-    progressBar.style.width = "0%";
+    fileSize.textContent =
+        "";
+
+
+    selectedFile.classList.add(
+        "hidden"
+    );
+
+
+    scanBtn.disabled =
+        true;
+
+
+    processingSection.classList.add(
+        "hidden"
+    );
+
+
+    progressBar.style.width =
+        "0%";
 }
 
 
 // =========================================================
-// ERRORS
+// ERROR HANDLING
 // =========================================================
 
 function showError(message) {
 
-    errorMessage.textContent = message;
+    errorMessage.textContent =
+        message;
 
-    errorMessage.classList.remove("hidden");
+
+    errorMessage.classList.remove(
+        "hidden"
+    );
 }
 
 
 function clearError() {
 
-    errorMessage.textContent = "";
-
-    errorMessage.classList.add("hidden");
-}
+    errorMessage.textContent =
+        "";
 
 
-function hideResults() {
-
-    resultsSection.classList.add("hidden");
+    errorMessage.classList.add(
+        "hidden"
+    );
 }
 
 
 // =========================================================
-// BASE64
+// HIDE RESULTS
+// =========================================================
+
+function hideResults() {
+
+    resultsSection.classList.add(
+        "hidden"
+    );
+}
+
+
+// =========================================================
+// FILE → BASE64
 // =========================================================
 
 function fileToBase64(file) {
 
-    return new Promise((resolve, reject) => {
+    return new Promise(
+        function (
+            resolve,
+            reject
+        ) {
 
-        const reader = new FileReader();
+            const reader =
+                new FileReader();
 
-        reader.onload = () => {
 
-            try {
+            reader.onload =
+                function () {
 
-                const result = reader.result;
+                    try {
 
-                resolve(result.split(",")[1]);
+                        const result =
+                            reader.result;
 
-            } catch (error) {
 
-                reject(error);
-            }
-        };
+                        const base64 =
+                            result
+                                .split(",")[1];
 
-        reader.onerror = () => {
 
-            reject(
-                new Error(
-                    "Unable to read the selected file."
-                )
+                        resolve(
+                            base64
+                        );
+
+                    } catch (error) {
+
+                        reject(
+                            error
+                        );
+                    }
+                };
+
+
+            reader.onerror =
+                function () {
+
+                    reject(
+                        new Error(
+                            "Unable to read the selected file."
+                        )
+                    );
+                };
+
+
+            reader.readAsDataURL(
+                file
             );
-        };
-
-        reader.readAsDataURL(file);
-    });
+        }
+    );
 }
 
 
 // =========================================================
-// SCAN
+// SCAN DOCUMENT
 // =========================================================
 
-scanBtn.addEventListener("click", async () => {
+scanBtn.addEventListener(
+    "click",
+    async function () {
 
-    if (!currentFile) {
+        if (
+            !currentFile
+        ) {
 
-        showError(
-            "Please select a document first."
-        );
+            showError(
+                "Please select a document first."
+            );
 
-        return;
-    }
+            return;
+        }
 
-    clearError();
-    hideResults();
-    startProcessing();
 
-    try {
+        clearError();
+        hideResults();
+        startProcessing();
 
-        processingText.textContent =
-            "Preparing document...";
-
-        const base64Data =
-            await fileToBase64(currentFile);
-
-        progressBar.style.width = "35%";
-
-        processingText.textContent =
-            "Sending document securely...";
-
-        const apiResponse = await fetch(
-            API_URL,
-            {
-                method: "POST",
-
-                headers: {
-                    "Content-Type": "application/json"
-                },
-
-                body: JSON.stringify({
-                    fileName: currentFile.name,
-                    fileData: base64Data
-                })
-            }
-        );
-
-        progressBar.style.width = "70%";
-
-        processingText.textContent =
-            "Amazon Bedrock is analyzing the document...";
-
-        let responseData;
 
         try {
 
-            responseData =
-                await apiResponse.json();
+            processingText.textContent =
+                "Preparing document...";
 
-        } catch {
 
-            throw new Error(
-                "The server returned an invalid response."
-            );
-        }
+            const base64Data =
+                await fileToBase64(
+                    currentFile
+                );
 
-        if (!apiResponse.ok) {
 
-            throw new Error(
-                responseData.error ||
-                "Document analysis failed."
-            );
-        }
+            progressBar.style.width =
+                "35%";
 
-        /*
-            Lambda proxy responses can contain
-            the real response inside body.
-        */
 
-        if (typeof responseData.body === "string") {
+            processingText.textContent =
+                "Sending document securely...";
+
+
+            const apiResponse =
+                await fetch(
+                    API_URL,
+                    {
+                        method:
+                            "POST",
+
+                        headers: {
+
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify({
+
+                                fileName:
+                                    currentFile.name,
+
+                                fileData:
+                                    base64Data
+                            })
+                    }
+                );
+
+
+            progressBar.style.width =
+                "70%";
+
+
+            processingText.textContent =
+                "Amazon Bedrock is analyzing the document...";
+
+
+            let responseData;
+
 
             try {
 
                 responseData =
-                    JSON.parse(responseData.body);
+                    await apiResponse.json();
 
-            } catch {
-                // keep response unchanged
+            } catch (error) {
+
+                throw new Error(
+                    "The server returned an invalid response."
+                );
             }
-        }
 
-        if (!responseData.success) {
 
-            throw new Error(
-                responseData.error ||
-                "Document analysis failed."
+            if (
+                !apiResponse.ok
+            ) {
+
+                throw new Error(
+                    responseData.error ||
+                    "Document analysis failed."
+                );
+            }
+
+
+            // =================================================
+            // HANDLE LAMBDA PROXY RESPONSE
+            // =================================================
+
+            if (
+                typeof responseData.body ===
+                "string"
+            ) {
+
+                try {
+
+                    responseData =
+                        JSON.parse(
+                            responseData.body
+                        );
+
+                } catch (error) {
+
+                    console.warn(
+                        "Unable to parse nested Lambda body."
+                    );
+                }
+            }
+
+
+            if (
+                !responseData.success
+            ) {
+
+                throw new Error(
+                    responseData.error ||
+                    "Document analysis failed."
+                );
+            }
+
+
+            if (
+                !responseData.result
+            ) {
+
+                throw new Error(
+                    "No analysis result was returned."
+                );
+            }
+
+
+            progressBar.style.width =
+                "100%";
+
+
+            processingText.textContent =
+                "Analysis complete";
+
+
+            displayResults(
+                responseData.result
+            );
+
+
+            stopProcessing();
+
+        } catch (error) {
+
+            console.error(
+                "Document scan error:",
+                error
+            );
+
+
+            processingSection.classList.add(
+                "hidden"
+            );
+
+
+            progressBar.style.width =
+                "0%";
+
+
+            scanBtn.disabled =
+                !currentFile;
+
+
+            showError(
+                error.message ||
+                "Unable to analyze the document."
             );
         }
-
-        if (!responseData.result) {
-
-            throw new Error(
-                "No analysis result was returned."
-            );
-        }
-
-        progressBar.style.width = "100%";
-
-        processingText.textContent =
-            "Analysis complete";
-
-        displayResults(responseData.result);
-
-        stopProcessing();
-
-    } catch (error) {
-
-        console.error(error);
-
-        processingSection.classList.add("hidden");
-
-        progressBar.style.width = "0%";
-
-        scanBtn.disabled = !currentFile;
-
-        showError(
-            error.message ||
-            "Unable to analyze the document."
-        );
     }
-});
+);
 
 
 // =========================================================
@@ -409,11 +714,18 @@ scanBtn.addEventListener("click", async () => {
 
 function startProcessing() {
 
-    processingSection.classList.remove("hidden");
+    processingSection.classList.remove(
+        "hidden"
+    );
 
-    scanBtn.disabled = true;
 
-    progressBar.style.width = "15%";
+    scanBtn.disabled =
+        true;
+
+
+    progressBar.style.width =
+        "15%";
+
 
     processingText.textContent =
         "Preparing document...";
@@ -422,82 +734,173 @@ function startProcessing() {
 
 function stopProcessing() {
 
-    progressBar.style.width = "100%";
+    progressBar.style.width =
+        "100%";
+
 
     processingText.textContent =
         "Analysis complete";
 
-    setTimeout(() => {
 
-        processingSection.classList.add("hidden");
+    setTimeout(
+        function () {
 
-        progressBar.style.width = "0%";
+            processingSection.classList.add(
+                "hidden"
+            );
 
-    }, 700);
 
-    scanBtn.disabled = !currentFile;
+            progressBar.style.width =
+                "0%";
+
+        },
+        700
+    );
+
+
+    scanBtn.disabled =
+        !currentFile;
 }
 
 
 // =========================================================
-// RESULTS
+// DISPLAY RESULTS
 // =========================================================
 
 function displayResults(result) {
 
-    latestResult = result;
+    latestResult =
+        result;
+
 
     categoryResult.textContent =
-        result.category || "Unknown";
+        result.category ||
+        "Unknown";
+
 
     documentTypeResult.textContent =
-        result.documentType || "Unknown";
+        result.documentType ||
+        "Unknown";
 
-    displayNotes(result.notes);
 
-    extractedFields.innerHTML = "";
+    displayNotes(
+        result.notes
+    );
 
-    const fields = result.fields || {};
 
-    const entries = Object.entries(fields);
+    extractedFields.innerHTML =
+        "";
 
-    if (!entries.length) {
+
+    const fields =
+        result.fields ||
+        {};
+
+
+    const entries =
+        Object.entries(
+            fields
+        );
+
+
+    if (
+        entries.length === 0
+    ) {
 
         const message =
-            document.createElement("p");
+            document.createElement(
+                "p"
+            );
+
 
         message.className =
             "additional-notes";
 
+
         message.textContent =
             "No information could be extracted.";
 
-        extractedFields.appendChild(message);
+
+        extractedFields.appendChild(
+            message
+        );
     }
 
-    entries.forEach(([key, value]) => {
 
-        /*
-            Detect an education subject collection
-            based on structure, NOT merely one
-            hard-coded field name.
-        */
+    entries.forEach(
+        function ([key, value]) {
 
-        if (isEducationSubjectCollection(key, value)) {
+            const normalizedKey =
+                normalizeKey(
+                    key
+                );
 
-            renderEducationTable(key, value);
 
-            return;
+            // =================================================
+            // PHYSICAL CHARACTERISTICS
+            // =================================================
+
+            if (
+                isPhysicalCharacteristicsField(
+                    normalizedKey
+                ) &&
+                value &&
+                typeof value === "object"
+            ) {
+
+                displayPhysicalCharacteristics(
+                    key,
+                    value
+                );
+
+                return;
+            }
+
+
+            // =================================================
+            // EDUCATION SUBJECT TABLE
+            // =================================================
+
+            if (
+                isEducationSubjectCollection(
+                    key,
+                    value
+                )
+            ) {
+
+                renderEducationTable(
+                    key,
+                    value
+                );
+
+                return;
+            }
+
+
+            // =================================================
+            // NORMAL FIELD
+            // =================================================
+
+            displayNormalField(
+                key,
+                value
+            );
         }
+    );
 
-        displayNormalField(key, value);
-    });
 
-    resultsSection.classList.remove("hidden");
+    resultsSection.classList.remove(
+        "hidden"
+    );
+
 
     resultsSection.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
+
+        behavior:
+            "smooth",
+
+        block:
+            "start"
     });
 }
 
@@ -508,15 +911,23 @@ function displayResults(result) {
 
 function displayNotes(notes) {
 
-    if (Array.isArray(notes)) {
+    if (
+        Array.isArray(
+            notes
+        )
+    ) {
 
         additionalNotes.textContent =
-            notes.length
+            notes.length > 0
+
                 ? notes.join("\n")
+
                 : "No additional information.";
+
 
         return;
     }
+
 
     additionalNotes.textContent =
         notes ||
@@ -525,86 +936,363 @@ function displayNotes(notes) {
 
 
 // =========================================================
-// EDUCATION TABLE DETECTION
+// DETECT PHYSICAL CHARACTERISTICS
 // =========================================================
 
-function isEducationSubjectCollection(key, value) {
+function isPhysicalCharacteristicsField(
+    normalizedKey
+) {
+
+    const fields =
+        new Set([
+
+            "physicalcharacteristics",
+            "physicalcharacteristic",
+
+            "identificationmarks",
+            "identificationmark",
+
+            "visibleidentificationmarks",
+
+            "physicalidentificationmarks",
+            "personalidentificationmarks",
+
+            "physicalmarks"
+
+        ]);
+
+
+    return fields.has(
+        normalizedKey
+    );
+}
+
+
+// =========================================================
+// DISPLAY PHYSICAL CHARACTERISTICS
+// =========================================================
+
+function displayPhysicalCharacteristics(
+    key,
+    value
+) {
+
+    const container =
+        document.createElement(
+            "div"
+        );
+
+
+    container.className =
+        "physical-characteristics-container";
+
+
+    // =====================================================
+    // TITLE
+    // =====================================================
+
+    const title =
+        document.createElement(
+            "div"
+        );
+
+
+    title.className =
+        "physical-characteristics-title";
+
+
+    title.textContent =
+        formatFieldName(
+            key
+        );
+
+
+    container.appendChild(
+        title
+    );
+
+
+    // =====================================================
+    // PHYSICAL CHARACTERISTIC ROWS
+    // =====================================================
+
+    Object.entries(
+        value
+    ).forEach(
+        function (
+            [fieldKey, fieldValue]
+        ) {
+
+            if (
+                fieldValue === null ||
+                fieldValue === undefined ||
+                fieldValue === ""
+            ) {
+
+                return;
+            }
+
+
+            const row =
+                document.createElement(
+                    "div"
+                );
+
+
+            row.className =
+                "physical-characteristic-row";
+
+
+            const label =
+                document.createElement(
+                    "div"
+                );
+
+
+            label.className =
+                "physical-characteristic-label";
+
+
+            label.textContent =
+                formatFieldName(
+                    fieldKey
+                );
+
+
+            const content =
+                document.createElement(
+                    "div"
+                );
+
+
+            content.className =
+                "physical-characteristic-value";
+
+
+            content.textContent =
+                String(
+                    fieldValue
+                );
+
+
+            row.appendChild(
+                label
+            );
+
+
+            row.appendChild(
+                content
+            );
+
+
+            container.appendChild(
+                row
+            );
+        }
+    );
+
+
+    extractedFields.appendChild(
+        container
+    );
+}
+
+
+// =========================================================
+// DETECT EDUCATION SUBJECT COLLECTION
+// =========================================================
+
+function isEducationSubjectCollection(
+    key,
+    value
+) {
 
     if (
         !value ||
         typeof value !== "object"
     ) {
+
         return false;
     }
 
+
     const normalizedKey =
-        normalizeKey(key);
+        normalizeKey(
+            key
+        );
 
-    const knownSubjectKeys = new Set([
-        "subjects",
-        "subject",
-        "subjectsandmarks",
-        "subjectandmarks",
-        "subjectdetails",
-        "subjectsdetails",
-        "subjectmarks",
-        "subjectsmarks",
-        "subjectwisemarks",
-        "subjectwisedetails",
-        "subjectwiseresults",
-        "markdetails",
-        "marksdetails",
-        "marksobtained",
-        "academicmarks",
-        "academicdetails"
-    ]);
 
-    if (knownSubjectKeys.has(normalizedKey)) {
+    // =====================================================
+    // EXPLICITLY NON-ACADEMIC
+    // =====================================================
+
+    const nonAcademicFields =
+        new Set([
+
+            "physicalcharacteristics",
+            "physicalcharacteristic",
+
+            "identificationmarks",
+            "identificationmark",
+
+            "visibleidentificationmarks",
+
+            "physicalidentificationmarks",
+            "personalidentificationmarks",
+
+            "physicalmarks",
+
+            "address",
+            "addresses",
+
+            "contactdetails",
+            "personalinformation"
+
+        ]);
+
+
+    if (
+        nonAcademicFields.has(
+            normalizedKey
+        )
+    ) {
+
+        return false;
+    }
+
+
+    // =====================================================
+    // KNOWN ACADEMIC COLLECTION NAMES
+    // =====================================================
+
+    const knownSubjectKeys =
+        new Set([
+
+            "subjects",
+            "subject",
+
+            "subjectsandmarks",
+            "subjectandmarks",
+
+            "subjectdetails",
+            "subjectsdetails",
+
+            "subjectmarks",
+            "subjectsmarks",
+
+            "subjectwisemarks",
+            "subjectwisedetails",
+            "subjectwiseresults",
+
+            "academicmarks",
+            "academicdetails",
+
+            "markdetails",
+            "marksdetails"
+
+        ]);
+
+
+    if (
+        knownSubjectKeys.has(
+            normalizedKey
+        )
+    ) {
+
         return true;
     }
 
-    /*
-        Structural detection.
 
-        Even if Nova invents another key name,
-        examine the contents and determine whether
-        it looks like a collection of subjects.
-    */
+    // =====================================================
+    // STRUCTURAL DETECTION
+    // =====================================================
 
-    const rows = normalizeEducationRows(value);
+    const rows =
+        normalizeEducationRows(
+            value
+        );
 
-    if (!rows.length) {
+
+    if (
+        rows.length === 0
+    ) {
+
         return false;
     }
 
-    const subjectIndicators = [
+
+    /*
+        IMPORTANT:
+
+        We intentionally DO NOT use generic words such as:
+
+        "mark"
+        "marks"
+
+        as academic indicators.
+
+        Otherwise:
+
+        identificationMark1
+        identificationMark2
+
+        could incorrectly become academic marks.
+    */
+
+    const strongAcademicIndicators = [
+
         "subjectname",
-        "subject",
         "subjectcode",
+
         "papername",
         "papercode",
-        "marks",
+
+        "theorymarks",
+        "theoryobtained",
+
+        "practicalmarks",
+        "practicalobtained",
+
+        "internalmarks",
+        "internalassessmentmarks",
+
+        "externalmarks",
+        "externalobtained",
+
         "markssecured",
         "marksobtained",
-        "theorymarks",
-        "practicalmarks",
-        "internalmarks",
-        "externalmarks",
+
         "totalmarks",
-        "grade"
+        "maximummarks",
+
+        "grade",
+        "gradepoint",
+
+        "academicresult"
     ];
 
-    return rows.some(row => {
 
-        const rowKeys =
-            Object.keys(row)
-                .map(normalizeKey);
+    return rows.some(
+        function (row) {
 
-        return subjectIndicators.some(
-            indicator =>
-                rowKeys.includes(indicator)
-        );
-    });
+            const rowKeys =
+                Object.keys(
+                    row
+                ).map(
+                    normalizeKey
+                );
+
+
+            return strongAcademicIndicators.some(
+                function (indicator) {
+
+                    return rowKeys.includes(
+                        indicator
+                    );
+                }
+            );
+        }
+    );
 }
 
 
@@ -612,200 +1300,288 @@ function isEducationSubjectCollection(key, value) {
 // UNIVERSAL EDUCATION TABLE
 // =========================================================
 
-function renderEducationTable(key, value) {
+function renderEducationTable(
+    key,
+    value
+) {
 
     const rows =
-        normalizeEducationRows(value);
+        normalizeEducationRows(
+            value
+        );
 
-    if (!rows.length) {
 
-        displayNormalField(key, value);
+    if (
+        rows.length === 0
+    ) {
+
+        displayNormalField(
+            key,
+            value
+        );
 
         return;
     }
 
+
     const container =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
+
 
     container.className =
         "marksheet-table-container";
 
+
     const title =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
+
 
     title.className =
         "marksheet-table-title";
 
+
     title.textContent =
-        formatFieldName(key);
+        getEducationTableTitle(
+            key
+        );
 
-    container.appendChild(title);
+
+    container.appendChild(
+        title
+    );
 
 
-    /*
-        -----------------------------------------------------
-        UNIVERSAL EDUCATION COLUMN MODEL
-
-        A board does NOT need to contain every field.
-
-        Only columns actually found in the document
-        will be displayed.
-        -----------------------------------------------------
-    */
+    // =====================================================
+    // UNIVERSAL EDUCATION COLUMNS
+    // =====================================================
 
     const definitions = [
 
         {
-            label: "Code",
+            label:
+                "Code",
 
             aliases: [
+
                 "subjectCode",
                 "subject_code",
+
                 "paperCode",
                 "paper_code",
+
                 "code"
             ]
         },
 
+
         {
-            label: "Subject",
+            label:
+                "Subject",
 
             aliases: [
+
                 "subjectName",
                 "subject_name",
+
                 "paperName",
                 "paper_name",
+
                 "subject",
                 "name",
+
                 "_subjectKey"
             ]
         },
 
+
         {
-            label: "Theory",
+            label:
+                "Theory",
 
             aliases: [
+
                 "theoryMarks",
                 "theory_marks",
+
                 "theoryObtained",
                 "theory_obtained",
+
                 "theory",
+
                 "writtenMarks",
-                "written_marks"
+                "written_marks",
+
+                "written"
             ]
         },
 
+
         {
-            label: "Practical",
+            label:
+                "Practical",
 
             aliases: [
+
                 "practicalMarks",
                 "practical_marks",
+
                 "practicalObtained",
                 "practical_obtained",
+
                 "practical",
+
                 "labMarks",
                 "lab_marks"
             ]
         },
 
+
         {
-            label: "Internal",
+            label:
+                "Internal",
 
             aliases: [
+
                 "internalAssessmentMarks",
                 "internal_assessment_marks",
+
                 "internalMarks",
                 "internal_marks",
+
                 "internalObtained",
                 "internal_obtained",
+
                 "internalAssessment",
                 "internal"
             ]
         },
 
+
         {
-            label: "External",
+            label:
+                "External",
 
             aliases: [
+
                 "externalMarks",
                 "external_marks",
+
                 "externalObtained",
                 "external_obtained",
+
                 "external"
             ]
         },
 
+
         {
-            label: "Maximum Marks",
+            label:
+                "Maximum Marks",
 
             aliases: [
+
                 "maximumMarks",
                 "maximum_marks",
+
                 "maxMarks",
                 "max_marks",
+
                 "maximum",
+
                 "totalMaximumMarks"
             ]
         },
 
+
         {
-            label: "Marks Obtained",
+            label:
+                "Marks Obtained",
 
             aliases: [
+
                 "marksSecured",
                 "marks_secured",
+
                 "marksObtained",
                 "marks_obtained",
+
                 "obtainedMarks",
                 "obtained_marks",
+
                 "score",
                 "marks"
             ]
         },
 
+
         {
-            label: "Total",
+            label:
+                "Total",
 
             aliases: [
+
                 "totalMarks",
                 "total_marks",
+
                 "subjectTotal",
                 "subject_total",
+
                 "total"
             ]
         },
 
+
         {
-            label: "Marks In Words",
+            label:
+                "Marks In Words",
 
             aliases: [
+
                 "marksInWords",
                 "marks_in_words",
+
                 "totalInWords",
                 "total_in_words",
-                "obtainedMarksInWords"
+
+                "obtainedMarksInWords",
+                "obtained_marks_in_words"
             ]
         },
 
+
         {
-            label: "Grade",
+            label:
+                "Grade",
 
             aliases: [
+
                 "grade",
+
                 "gradePoint",
                 "grade_point",
+
                 "letterGrade",
-                "letter_grade"
+                "letter_grade",
+
+                "positionalGrade",
+                "positional_grade"
             ]
         },
 
+
         {
-            label: "Result",
+            label:
+                "Result",
 
             aliases: [
+
                 "result",
                 "status",
+
                 "passFail",
                 "pass_fail"
             ]
@@ -813,121 +1589,231 @@ function renderEducationTable(key, value) {
     ];
 
 
-    /*
-        Determine which columns are actually present.
-    */
+    // =====================================================
+    // ONLY SHOW COLUMNS THAT EXIST
+    // =====================================================
 
     const activeColumns =
-        definitions.filter(definition =>
+        definitions.filter(
+            function (definition) {
 
-            rows.some(row =>
+                return rows.some(
+                    function (row) {
 
-                getAliasValue(
-                    row,
-                    definition.aliases
-                ) !== null
-            )
+                        return (
+                            getAliasValue(
+                                row,
+                                definition.aliases
+                            ) !== null
+                        );
+                    }
+                );
+            }
         );
 
 
-    if (!activeColumns.length) {
+    if (
+        activeColumns.length === 0
+    ) {
 
-        displayNormalField(key, value);
+        displayNormalField(
+            key,
+            value
+        );
 
         return;
     }
 
 
+    // =====================================================
+    // TABLE WRAPPER
+    // =====================================================
+
     const wrapper =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
+
 
     wrapper.className =
         "marks-table-wrapper";
 
 
     const table =
-        document.createElement("table");
+        document.createElement(
+            "table"
+        );
+
 
     table.className =
         "marks-table";
 
 
     // =====================================================
-    // TABLE HEADER
+    // HEADER
     // =====================================================
 
     const thead =
-        document.createElement("thead");
+        document.createElement(
+            "thead"
+        );
+
 
     const headerRow =
-        document.createElement("tr");
+        document.createElement(
+            "tr"
+        );
 
-    activeColumns.forEach(column => {
 
-        const th =
-            document.createElement("th");
+    activeColumns.forEach(
+        function (column) {
 
-        th.textContent =
-            column.label;
+            const th =
+                document.createElement(
+                    "th"
+                );
 
-        headerRow.appendChild(th);
-    });
 
-    thead.appendChild(headerRow);
+            th.textContent =
+                column.label;
 
-    table.appendChild(thead);
+
+            headerRow.appendChild(
+                th
+            );
+        }
+    );
+
+
+    thead.appendChild(
+        headerRow
+    );
+
+
+    table.appendChild(
+        thead
+    );
 
 
     // =====================================================
-    // TABLE BODY
+    // BODY
     // =====================================================
 
     const tbody =
-        document.createElement("tbody");
+        document.createElement(
+            "tbody"
+        );
 
-    rows.forEach(rowData => {
 
-        const tr =
-            document.createElement("tr");
+    rows.forEach(
+        function (rowData) {
 
-        activeColumns.forEach(column => {
-
-            const td =
-                document.createElement("td");
-
-            let fieldValue =
-                getAliasValue(
-                    rowData,
-                    column.aliases
+            const tr =
+                document.createElement(
+                    "tr"
                 );
 
-            if (
-                column.label === "Subject" &&
-                fieldValue === rowData._subjectKey
-            ) {
 
-                fieldValue =
-                    formatFieldName(fieldValue);
-            }
+            activeColumns.forEach(
+                function (column) {
 
-            td.textContent =
-                fieldValue === null
-                    ? "—"
-                    : formatTableValue(fieldValue);
+                    const td =
+                        document.createElement(
+                            "td"
+                        );
 
-            tr.appendChild(td);
-        });
 
-        tbody.appendChild(tr);
-    });
+                    let fieldValue =
+                        getAliasValue(
+                            rowData,
+                            column.aliases
+                        );
 
-    table.appendChild(tbody);
 
-    wrapper.appendChild(table);
+                    if (
+                        column.label ===
+                            "Subject" &&
+                        fieldValue ===
+                            rowData._subjectKey
+                    ) {
 
-    container.appendChild(wrapper);
+                        fieldValue =
+                            formatFieldName(
+                                fieldValue
+                            );
+                    }
 
-    extractedFields.appendChild(container);
+
+                    td.textContent =
+                        fieldValue === null
+
+                            ? "—"
+
+                            : formatTableValue(
+                                fieldValue
+                            );
+
+
+                    tr.appendChild(
+                        td
+                    );
+                }
+            );
+
+
+            tbody.appendChild(
+                tr
+            );
+        }
+    );
+
+
+    table.appendChild(
+        tbody
+    );
+
+
+    wrapper.appendChild(
+        table
+    );
+
+
+    container.appendChild(
+        wrapper
+    );
+
+
+    extractedFields.appendChild(
+        container
+    );
+}
+
+
+// =========================================================
+// EDUCATION TABLE TITLE
+// =========================================================
+
+function getEducationTableTitle(
+    key
+) {
+
+    const normalized =
+        normalizeKey(
+            key
+        );
+
+
+    if (
+        normalized === "subjects"
+    ) {
+
+        return "Subjects & Marks";
+    }
+
+
+    return formatFieldName(
+        key
+    );
 }
 
 
@@ -935,136 +1821,192 @@ function renderEducationTable(key, value) {
 // NORMALIZE EDUCATION ROWS
 // =========================================================
 
-function normalizeEducationRows(value) {
+function normalizeEducationRows(
+    value
+) {
 
-    /*
-        CBSE / many board responses:
+    // =====================================================
+    // ARRAY FORMAT
+    // CBSE / CISCE / OTHER BOARDS
+    // =====================================================
 
-        [
-          {
-             subjectCode: "...",
-             subjectName: "...",
-             theoryMarks: "..."
-          }
-        ]
-    */
-
-    if (Array.isArray(value)) {
+    if (
+        Array.isArray(
+            value
+        )
+    ) {
 
         return value
-            .filter(item =>
-                item !== null &&
-                item !== undefined
-            )
-            .map((item, index) => {
 
-                if (
-                    item &&
-                    typeof item === "object" &&
-                    !Array.isArray(item)
+            .filter(
+                function (item) {
+
+                    return (
+                        item !== null &&
+                        item !== undefined
+                    );
+                }
+            )
+
+            .map(
+                function (
+                    item,
+                    index
                 ) {
 
-                    return item;
+                    if (
+                        item &&
+                        typeof item ===
+                            "object" &&
+                        !Array.isArray(
+                            item
+                        )
+                    ) {
+
+                        return item;
+                    }
+
+
+                    return {
+
+                        _subjectKey:
+                            "Subject " +
+                            (
+                                index +
+                                1
+                            ),
+
+                        marksSecured:
+                            item
+                    };
                 }
-
-                return {
-                    _subjectKey:
-                        `Subject ${index + 1}`,
-
-                    marksSecured:
-                        item
-                };
-            });
+            );
     }
 
 
-    /*
-        AP / Telangana / other possible structures:
-
-        {
-            mathematics: {
-                marksSecured: "92"
-            },
-
-            firstLanguage: {
-                name: "TELUGU",
-                marksSecured: "90"
-            }
-        }
-    */
+    // =====================================================
+    // OBJECT FORMAT
+    // AP / TELANGANA / OTHER STATE BOARDS
+    // =====================================================
 
     if (
         value &&
-        typeof value === "object"
+        typeof value ===
+            "object"
     ) {
 
-        return Object.entries(value)
-            .map(([subjectKey, subjectValue]) => {
+        return Object.entries(
+            value
+        ).map(
+            function (
+                [
+                    subjectKey,
+                    subjectValue
+                ]
+            ) {
 
                 if (
                     subjectValue &&
-                    typeof subjectValue === "object" &&
-                    !Array.isArray(subjectValue)
+                    typeof subjectValue ===
+                        "object" &&
+                    !Array.isArray(
+                        subjectValue
+                    )
                 ) {
 
                     return {
-                        _subjectKey: subjectKey,
+
+                        _subjectKey:
+                            subjectKey,
+
                         ...subjectValue
                     };
                 }
 
+
                 return {
-                    _subjectKey: subjectKey,
-                    marksSecured: subjectValue
+
+                    _subjectKey:
+                        subjectKey,
+
+                    marksSecured:
+                        subjectValue
                 };
-            });
+            }
+        );
     }
+
 
     return [];
 }
 
 
 // =========================================================
-// FIELD ALIAS MATCHING
+// FIND VALUE USING ALIASES
 // =========================================================
 
-function getAliasValue(object, aliases) {
+function getAliasValue(
+    object,
+    aliases
+) {
 
-    /*
-        Exact match first.
-    */
+    // =====================================================
+    // EXACT MATCH
+    // =====================================================
 
-    for (const alias of aliases) {
+    for (
+        const alias of aliases
+    ) {
 
-        if (hasValue(object[alias])) {
-            return object[alias];
+        if (
+            hasValue(
+                object[alias]
+            )
+        ) {
+
+            return object[
+                alias
+            ];
         }
     }
 
 
-    /*
-        Normalized match allows:
-
-        theoryMarks
-        theory_marks
-        Theory Marks
-        THEORY-MARKS
-
-        to be treated as equivalent.
-    */
+    // =====================================================
+    // NORMALIZED MATCH
+    // =====================================================
 
     const normalizedAliases =
-        aliases.map(normalizeKey);
+        aliases.map(
+            normalizeKey
+        );
 
-    for (const [key, value] of Object.entries(object)) {
 
-        if (!hasValue(value)) {
+    for (
+        const [
+            key,
+            value
+        ]
+        of
+        Object.entries(
+            object
+        )
+    ) {
+
+        if (
+            !hasValue(
+                value
+            )
+        ) {
+
             continue;
         }
 
+
         if (
             normalizedAliases.includes(
-                normalizeKey(key)
+                normalizeKey(
+                    key
+                )
             )
         ) {
 
@@ -1072,148 +2014,281 @@ function getAliasValue(object, aliases) {
         }
     }
 
+
     return null;
 }
 
 
 // =========================================================
-// NORMAL FIELD DISPLAY
+// NORMAL FIELD
 // =========================================================
 
-function displayNormalField(key, value) {
+function displayNormalField(
+    key,
+    value
+) {
 
     const row =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
+
 
     row.className =
         "extracted-field";
 
 
     const label =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
+
 
     label.className =
         "field-name";
 
+
     label.textContent =
-        formatFieldName(key);
+        formatFieldName(
+            key
+        );
 
 
     const content =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
+
 
     content.className =
         "field-value";
 
 
-    if (!hasValue(value)) {
+    if (
+        !hasValue(
+            value
+        )
+    ) {
 
         content.textContent =
             "Not found";
 
     } else if (
-        typeof value === "object"
+        typeof value ===
+            "object"
     ) {
 
         content.textContent =
-            formatObjectValue(value);
+            formatObjectValue(
+                value
+            );
 
     } else {
 
         content.textContent =
-            String(value);
-    }
-
-
-    row.appendChild(label);
-
-    row.appendChild(content);
-
-    extractedFields.appendChild(row);
-}
-
-
-// =========================================================
-// FORMAT OBJECT
-// =========================================================
-
-function formatObjectValue(value) {
-
-    if (Array.isArray(value)) {
-
-        return value
-            .map(item => {
-
-                if (
-                    item &&
-                    typeof item === "object"
-                ) {
-
-                    return Object.entries(item)
-                        .map(([key, val]) =>
-                            `${formatFieldName(key)}: ${formatTableValue(val)}`
-                        )
-                        .join(", ");
-                }
-
-                return String(item);
-            })
-            .join("\n");
-    }
-
-
-    return Object.entries(value)
-        .map(([key, val]) => {
-
-            if (
-                val &&
-                typeof val === "object"
-            ) {
-
-                return (
-                    `${formatFieldName(key)}: ` +
-                    JSON.stringify(val)
-                );
-            }
-
-            return (
-                `${formatFieldName(key)}: ` +
-                `${formatTableValue(val)}`
+            String(
+                value
             );
-        })
-        .join("\n");
-}
+    }
 
 
-// =========================================================
-// VALUE HELPERS
-// =========================================================
+    row.appendChild(
+        label
+    );
 
-function hasValue(value) {
 
-    return (
-        value !== undefined &&
-        value !== null &&
-        value !== ""
+    row.appendChild(
+        content
+    );
+
+
+    extractedFields.appendChild(
+        row
     );
 }
 
 
-function formatTableValue(value) {
+// =========================================================
+// FORMAT OBJECT VALUE
+// =========================================================
 
-    if (!hasValue(value)) {
+function formatObjectValue(
+    value
+) {
+
+    if (
+        Array.isArray(
+            value
+        )
+    ) {
+
+        return value
+
+            .map(
+                function (item) {
+
+                    if (
+                        item &&
+                        typeof item ===
+                            "object"
+                    ) {
+
+                        return Object.entries(
+                            item
+                        )
+
+                            .map(
+                                function (
+                                    [
+                                        key,
+                                        val
+                                    ]
+                                ) {
+
+                                    return (
+                                        formatFieldName(
+                                            key
+                                        ) +
+                                        ": " +
+                                        formatTableValue(
+                                            val
+                                        )
+                                    );
+                                }
+                            )
+
+                            .join(
+                                ", "
+                            );
+                    }
+
+
+                    return String(
+                        item
+                    );
+                }
+            )
+
+            .join(
+                "\n"
+            );
+    }
+
+
+    return Object.entries(
+        value
+    )
+
+        .map(
+            function (
+                [
+                    key,
+                    val
+                ]
+            ) {
+
+                if (
+                    val &&
+                    typeof val ===
+                        "object"
+                ) {
+
+                    return (
+                        formatFieldName(
+                            key
+                        ) +
+                        ": " +
+                        JSON.stringify(
+                            val
+                        )
+                    );
+                }
+
+
+                return (
+                    formatFieldName(
+                        key
+                    ) +
+                    ": " +
+                    formatTableValue(
+                        val
+                    )
+                );
+            }
+        )
+
+        .join(
+            "\n"
+        );
+}
+
+
+// =========================================================
+// VALUE CHECK
+// =========================================================
+
+function hasValue(
+    value
+) {
+
+    return (
+
+        value !==
+            undefined &&
+
+        value !==
+            null &&
+
+        value !==
+            ""
+    );
+}
+
+
+// =========================================================
+// TABLE VALUE
+// =========================================================
+
+function formatTableValue(
+    value
+) {
+
+    if (
+        !hasValue(
+            value
+        )
+    ) {
+
         return "—";
     }
 
-    if (Array.isArray(value)) {
-        return value.join(", ");
+
+    if (
+        Array.isArray(
+            value
+        )
+    ) {
+
+        return value.join(
+            ", "
+        );
     }
 
-    if (typeof value === "object") {
-        return JSON.stringify(value);
+
+    if (
+        typeof value ===
+            "object"
+    ) {
+
+        return JSON.stringify(
+            value
+        );
     }
 
-    return String(value);
+
+    return String(
+        value
+    );
 }
 
 
@@ -1221,23 +2296,39 @@ function formatTableValue(value) {
 // NORMALIZE KEY
 // =========================================================
 
-function normalizeKey(value) {
+function normalizeKey(
+    value
+) {
 
-    return String(value)
+    return String(
+        value
+    )
+
         .toLowerCase()
-        .replace(/[^a-z0-9]/g, "");
+
+        .replace(
+            /[^a-z0-9]/g,
+            ""
+        );
 }
 
 
 // =========================================================
-// FORMAT FIELD LABEL
+// FORMAT FIELD NAME
 // =========================================================
 
-function formatFieldName(name) {
+function formatFieldName(
+    name
+) {
 
-    return String(name)
+    return String(
+        name
+    )
 
-        .replace(/_/g, " ")
+        .replace(
+            /_/g,
+            " "
+        )
 
         .replace(
             /([a-z])([A-Z])/g,
@@ -1246,8 +2337,13 @@ function formatFieldName(name) {
 
         .replace(
             /\b\w/g,
-            letter =>
-                letter.toUpperCase()
+            function (
+                letter
+            ) {
+
+                return letter
+                    .toUpperCase();
+            }
         );
 }
 
@@ -1256,43 +2352,71 @@ function formatFieldName(name) {
 // DOWNLOAD JSON
 // =========================================================
 
-downloadBtn.addEventListener("click", () => {
+downloadBtn.addEventListener(
+    "click",
+    function () {
 
-    if (!latestResult) {
-        return;
+        if (
+            !latestResult
+        ) {
+
+            return;
+        }
+
+
+        const json =
+            JSON.stringify(
+                latestResult,
+                null,
+                2
+            );
+
+
+        const blob =
+            new Blob(
+                [
+                    json
+                ],
+                {
+                    type:
+                        "application/json"
+                }
+            );
+
+
+        const url =
+            URL.createObjectURL(
+                blob
+            );
+
+
+        const link =
+            document.createElement(
+                "a"
+            );
+
+
+        link.href =
+            url;
+
+
+        link.download =
+            "document-analysis.json";
+
+
+        document.body.appendChild(
+            link
+        );
+
+
+        link.click();
+
+
+        link.remove();
+
+
+        URL.revokeObjectURL(
+            url
+        );
     }
-
-    const json =
-        JSON.stringify(
-            latestResult,
-            null,
-            2
-        );
-
-    const blob =
-        new Blob(
-            [json],
-            {
-                type: "application/json"
-            }
-        );
-
-    const url =
-        URL.createObjectURL(blob);
-
-    const link =
-        document.createElement("a");
-
-    link.href = url;
-
-    link.download =
-        "document-analysis.json";
-
-    document.body.appendChild(link);
-
-    link.click();
-
-    link.remove();
-
-    URL.revokeObjectURL(url);
-});
+);
