@@ -890,28 +890,33 @@ button {
     object-fit: contain;
 }
 /* =========================================================
-   MARKSHEET TABLE
+   UNIVERSAL 10TH / 12TH MARKSHEET TABLE
    ========================================================= */
 
 .marksheet-table-container {
     width: 100%;
-    margin-top: 8px;
-    margin-bottom: 20px;
+    margin-top: 14px;
+    margin-bottom: 24px;
 }
 
 .marksheet-table-title {
+    margin-bottom: 12px;
     font-size: 14px;
     font-weight: 500;
-    margin-bottom: 14px;
     opacity: 0.8;
+}
+
+.marks-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 10px;
 }
 
 .marks-table {
     width: 100%;
+    min-width: 720px;
     border-collapse: collapse;
     border-spacing: 0;
-    overflow: hidden;
-    border-radius: 10px;
     background: rgba(255, 255, 255, 0.02);
 }
 
@@ -920,26 +925,32 @@ button {
 }
 
 .marks-table th {
-    padding: 15px 18px;
-    text-align: left;
-    font-size: 13px;
+    padding: 14px 16px;
+    text-align: center;
+    font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    white-space: nowrap;
+
+    border-bottom:
+        1px solid rgba(255, 255, 255, 0.12);
 }
 
 .marks-table td {
-    padding: 15px 18px;
-    text-align: left;
-    font-size: 15px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 14px 16px;
+    text-align: center;
+    font-size: 14px;
+    white-space: nowrap;
+
+    border-bottom:
+        1px solid rgba(255, 255, 255, 0.08);
 }
 
-.marks-table th:last-child,
-.marks-table td:last-child {
-    width: 180px;
-    text-align: center;
+.marks-table th:nth-child(2),
+.marks-table td:nth-child(2) {
+    min-width: 210px;
+    text-align: left;
 }
 
 .marks-table tbody tr:last-child td {
@@ -950,16 +961,25 @@ button {
     background: rgba(255, 255, 255, 0.035);
 }
 
-@media (max-width: 600px) {
+
+/* =========================================================
+   MOBILE MARKSHEET TABLE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .marks-table {
+        min-width: 650px;
+    }
 
     .marks-table th,
     .marks-table td {
-        padding: 12px 10px;
-        font-size: 13px;
+        padding: 11px 12px;
+        font-size: 12px;
     }
 
-    .marks-table th:last-child,
-    .marks-table td:last-child {
-        width: 110px;
+    .marks-table th:nth-child(2),
+    .marks-table td:nth-child(2) {
+        min-width: 170px;
     }
 }

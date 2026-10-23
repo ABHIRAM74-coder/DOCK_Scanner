@@ -1,15 +1,13 @@
 "use strict";
 
-/*
-    =========================================================
-    DOCUMENT AI SCANNER
-    Frontend + AWS API Gateway + Lambda + Amazon Bedrock
-    =========================================================
-*/
+/* =========================================================
+   DOCUMENT AI SCANNER
+   Frontend → API Gateway → Lambda → Amazon Bedrock
+   ========================================================= */
 
 
 // =========================================================
-// API
+// API CONFIGURATION
 // =========================================================
 
 const API_URL =
@@ -29,8 +27,7 @@ const ALLOWED_EXTENSIONS = new Set([
     "png"
 ]);
 
-const MAX_FILE_SIZE =
-    10 * 1024 * 1024;
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 
 // =========================================================
@@ -104,107 +101,69 @@ let latestResult = null;
 // CHOOSE FILE
 // =========================================================
 
-chooseFileBtn.addEventListener(
-    "click",
-    function () {
-        fileInput.click();
+chooseFileBtn.addEventListener("click", function () {
+    fileInput.click();
+});
+
+
+// =========================================================
+// FILE INPUT
+// =========================================================
+
+fileInput.addEventListener("change", function () {
+
+    if (
+        fileInput.files &&
+        fileInput.files.length > 0
+    ) {
+        handleFile(fileInput.files[0]);
     }
-);
+});
 
 
 // =========================================================
-// FILE INPUT CHANGE
+// DRAG AND DROP
 // =========================================================
 
-fileInput.addEventListener(
-    "change",
-    function () {
+["dragenter", "dragover"].forEach(function (eventName) {
 
-        if (
-            fileInput.files &&
-            fileInput.files.length > 0
-        ) {
-            handleFile(
-                fileInput.files[0]
-            );
-        }
+    dropArea.addEventListener(eventName, function (event) {
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        dropArea.classList.add("dragging");
+    });
+});
+
+
+["dragleave", "drop"].forEach(function (eventName) {
+
+    dropArea.addEventListener(eventName, function (event) {
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        dropArea.classList.remove("dragging");
+    });
+});
+
+
+dropArea.addEventListener("drop", function (event) {
+
+    const files = event.dataTransfer.files;
+
+    if (
+        files &&
+        files.length > 0
+    ) {
+        handleFile(files[0]);
     }
-);
+});
 
 
 // =========================================================
-// DRAG EVENTS
-// =========================================================
-
-[
-    "dragenter",
-    "dragover"
-].forEach(
-    function (eventName) {
-
-        dropArea.addEventListener(
-            eventName,
-            function (event) {
-
-                event.preventDefault();
-                event.stopPropagation();
-
-                dropArea.classList.add(
-                    "dragging"
-                );
-            }
-        );
-    }
-);
-
-
-[
-    "dragleave",
-    "drop"
-].forEach(
-    function (eventName) {
-
-        dropArea.addEventListener(
-            eventName,
-            function (event) {
-
-                event.preventDefault();
-                event.stopPropagation();
-
-                dropArea.classList.remove(
-                    "dragging"
-                );
-            }
-        );
-    }
-);
-
-
-// =========================================================
-// DROP FILE
-// =========================================================
-
-dropArea.addEventListener(
-    "drop",
-    function (event) {
-
-        const files =
-            event.dataTransfer.files;
-
-        if (
-            files &&
-            files.length > 0
-        ) {
-            handleFile(
-                files[0]
-            );
-        }
-    }
-);
-
-
-// =========================================================
-// HANDLE FILE
+// HANDLE SELECTED FILE
 // =========================================================
 
 function handleFile(file) {
@@ -213,53 +172,38 @@ function handleFile(file) {
     hideResults();
 
     const extension =
-        getFileExtension(
-            file.name
-        );
+        getFileExtension(file.name);
 
 
-    if (
-        !ALLOWED_EXTENSIONS.has(
-            extension
-        )
-    ) {
+    if (!ALLOWED_EXTENSIONS.has(extension)) {
 
         showError(
-            "Unsupported file type. " +
-            "Currently supported: PDF, DOCX, TXT, JPG, JPEG and PNG."
+            "Unsupported file type. Currently supported: PDF, DOCX, TXT, JPG, JPEG and PNG."
         );
 
         resetFile();
-
         return;
     }
 
 
-    if (
-        file.size === 0
-    ) {
+    if (file.size === 0) {
 
         showError(
             "The selected file is empty."
         );
 
         resetFile();
-
         return;
     }
 
 
-    if (
-        file.size >
-        MAX_FILE_SIZE
-    ) {
+    if (file.size > MAX_FILE_SIZE) {
 
         showError(
             "The selected file exceeds the 10 MB limit."
         );
 
         resetFile();
-
         return;
     }
 
@@ -270,13 +214,9 @@ function handleFile(file) {
         file.name;
 
     fileSize.textContent =
-        formatFileSize(
-            file.size
-        );
+        formatFileSize(file.size);
 
-    selectedFile.classList.remove(
-        "hidden"
-    );
+    selectedFile.classList.remove("hidden");
 
     scanBtn.disabled = false;
 }
@@ -289,13 +229,9 @@ function handleFile(file) {
 function getFileExtension(name) {
 
     const pieces =
-        name
-            .toLowerCase()
-            .split(".");
+        name.toLowerCase().split(".");
 
-    if (
-        pieces.length < 2
-    ) {
+    if (pieces.length < 2) {
         return "";
     }
 
@@ -309,31 +245,17 @@ function getFileExtension(name) {
 
 function formatFileSize(bytes) {
 
-    if (
-        bytes < 1024
-    ) {
-
-        return (
-            bytes +
-            " bytes"
-        );
+    if (bytes < 1024) {
+        return bytes + " bytes";
     }
 
-
-    if (
-        bytes <
-        1024 * 1024
-    ) {
+    if (bytes < 1024 * 1024) {
 
         return (
-            (
-                bytes /
-                1024
-            ).toFixed(2) +
+            (bytes / 1024).toFixed(2) +
             " KB"
         );
     }
-
 
     return (
         (
@@ -350,15 +272,12 @@ function formatFileSize(bytes) {
 // REMOVE FILE
 // =========================================================
 
-removeFileBtn.addEventListener(
-    "click",
-    function () {
+removeFileBtn.addEventListener("click", function () {
 
-        resetFile();
-        clearError();
-        hideResults();
-    }
-);
+    resetFile();
+    clearError();
+    hideResults();
+});
 
 
 // =========================================================
@@ -375,47 +294,33 @@ function resetFile() {
     fileName.textContent = "";
     fileSize.textContent = "";
 
-    selectedFile.classList.add(
-        "hidden"
-    );
+    selectedFile.classList.add("hidden");
 
     scanBtn.disabled = true;
 
-    processingSection.classList.add(
-        "hidden"
-    );
+    processingSection.classList.add("hidden");
 
-    progressBar.style.width =
-        "0%";
+    progressBar.style.width = "0%";
 }
 
 
 // =========================================================
-// SHOW ERROR
+// ERROR
 // =========================================================
 
 function showError(message) {
 
-    errorMessage.textContent =
-        message;
+    errorMessage.textContent = message;
 
-    errorMessage.classList.remove(
-        "hidden"
-    );
+    errorMessage.classList.remove("hidden");
 }
 
-
-// =========================================================
-// CLEAR ERROR
-// =========================================================
 
 function clearError() {
 
     errorMessage.textContent = "";
 
-    errorMessage.classList.add(
-        "hidden"
-    );
+    errorMessage.classList.add("hidden");
 }
 
 
@@ -425,69 +330,53 @@ function clearError() {
 
 function hideResults() {
 
-    resultsSection.classList.add(
-        "hidden"
-    );
+    resultsSection.classList.add("hidden");
 }
 
 
 // =========================================================
-// CONVERT FILE TO BASE64
+// FILE → BASE64
 // =========================================================
 
 function fileToBase64(file) {
 
-    return new Promise(
-        function (
-            resolve,
-            reject
-        ) {
+    return new Promise(function (resolve, reject) {
 
-            const reader =
-                new FileReader();
+        const reader =
+            new FileReader();
 
 
-            reader.onload =
-                function () {
+        reader.onload = function () {
 
-                    try {
+            try {
 
-                        const result =
-                            reader.result;
+                const result =
+                    reader.result;
 
-                        const base64 =
-                            result
-                                .split(",")[1];
+                const base64 =
+                    result.split(",")[1];
 
-                        resolve(
-                            base64
-                        );
-                    }
-                    catch (error) {
+                resolve(base64);
 
-                        reject(
-                            error
-                        );
-                    }
-                };
+            } catch (error) {
+
+                reject(error);
+            }
+        };
 
 
-            reader.onerror =
-                function () {
+        reader.onerror = function () {
 
-                    reject(
-                        new Error(
-                            "Unable to read the selected file."
-                        )
-                    );
-                };
-
-
-            reader.readAsDataURL(
-                file
+            reject(
+                new Error(
+                    "Unable to read the selected file."
+                )
             );
-        }
-    );
+        };
+
+
+        reader.readAsDataURL(file);
+    });
 }
 
 
@@ -495,193 +384,179 @@ function fileToBase64(file) {
 // SCAN DOCUMENT
 // =========================================================
 
-scanBtn.addEventListener(
-    "click",
-    async function () {
+scanBtn.addEventListener("click", async function () {
 
-        if (
-            !currentFile
-        ) {
+    if (!currentFile) {
 
-            showError(
-                "Please select a document first."
+        showError(
+            "Please select a document first."
+        );
+
+        return;
+    }
+
+
+    clearError();
+    hideResults();
+    startProcessing();
+
+
+    try {
+
+        processingText.textContent =
+            "Preparing document...";
+
+
+        const base64Data =
+            await fileToBase64(currentFile);
+
+
+        progressBar.style.width =
+            "35%";
+
+
+        processingText.textContent =
+            "Sending document securely...";
+
+
+        const apiResponse =
+            await fetch(
+                API_URL,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify({
+                            fileName:
+                                currentFile.name,
+
+                            fileData:
+                                base64Data
+                        })
+                }
             );
 
-            return;
-        }
+
+        progressBar.style.width =
+            "70%";
 
 
-        clearError();
-        hideResults();
-        startProcessing();
+        processingText.textContent =
+            "Amazon Bedrock is analyzing the document...";
+
+
+        let responseData;
 
 
         try {
 
-            processingText.textContent =
-                "Preparing document...";
+            responseData =
+                await apiResponse.json();
+
+        } catch (error) {
+
+            throw new Error(
+                "The server returned an invalid response."
+            );
+        }
 
 
-            const base64Data =
-                await fileToBase64(
-                    currentFile
-                );
+        if (!apiResponse.ok) {
+
+            throw new Error(
+                responseData.error ||
+                "Document analysis failed."
+            );
+        }
 
 
-            progressBar.style.width =
-                "35%";
-
-
-            processingText.textContent =
-                "Sending document securely...";
-
-
-            const apiResponse =
-                await fetch(
-                    API_URL,
-                    {
-                        method: "POST",
-
-                        headers: {
-                            "Content-Type":
-                                "application/json"
-                        },
-
-                        body:
-                            JSON.stringify({
-                                fileName:
-                                    currentFile.name,
-
-                                fileData:
-                                    base64Data
-                            })
-                    }
-                );
-
-
-            progressBar.style.width =
-                "75%";
-
-
-            processingText.textContent =
-                "Amazon Bedrock is analyzing the document...";
-
-
-            let responseData;
-
+        // Lambda proxy response
+        if (
+            typeof responseData.body ===
+            "string"
+        ) {
 
             try {
 
                 responseData =
-                    await apiResponse.json();
+                    JSON.parse(
+                        responseData.body
+                    );
+
+            } catch (error) {
+                // Keep original response
             }
-            catch (error) {
-
-                throw new Error(
-                    "The server returned an invalid response."
-                );
-            }
-
-
-            if (
-                !apiResponse.ok
-            ) {
-
-                throw new Error(
-                    responseData.error ||
-                    "Document analysis failed."
-                );
-            }
-
-
-            // Handle Lambda proxy body if returned as string
-            if (
-                typeof responseData.body ===
-                "string"
-            ) {
-
-                try {
-
-                    responseData =
-                        JSON.parse(
-                            responseData.body
-                        );
-                }
-                catch (error) {
-
-                    // Leave responseData unchanged
-                }
-            }
-
-
-            if (
-                !responseData.success
-            ) {
-
-                throw new Error(
-                    responseData.error ||
-                    "Document analysis failed."
-                );
-            }
-
-
-            if (
-                !responseData.result
-            ) {
-
-                throw new Error(
-                    "No analysis result was returned."
-                );
-            }
-
-
-            progressBar.style.width =
-                "100%";
-
-
-            processingText.textContent =
-                "Analysis complete";
-
-
-            displayResults(
-                responseData.result
-            );
-
-
-            stopProcessing();
         }
-        catch (error) {
-
-            console.error(
-                "Document scan error:",
-                error
-            );
 
 
-            processingSection.classList.add(
-                "hidden"
-            );
+        if (!responseData.success) {
 
-
-            progressBar.style.width =
-                "0%";
-
-
-            scanBtn.disabled =
-                !currentFile;
-
-
-            showError(
-                error.message ||
-                "Unable to analyze the document."
+            throw new Error(
+                responseData.error ||
+                "Document analysis failed."
             );
         }
+
+
+        if (!responseData.result) {
+
+            throw new Error(
+                "No analysis result was returned."
+            );
+        }
+
+
+        progressBar.style.width =
+            "100%";
+
+
+        processingText.textContent =
+            "Analysis complete";
+
+
+        displayResults(
+            responseData.result
+        );
+
+
+        stopProcessing();
+
+    } catch (error) {
+
+        console.error(
+            "Document scan error:",
+            error
+        );
+
+
+        processingSection.classList.add(
+            "hidden"
+        );
+
+
+        progressBar.style.width =
+            "0%";
+
+
+        scanBtn.disabled =
+            !currentFile;
+
+
+        showError(
+            error.message ||
+            "Unable to analyze the document."
+        );
     }
-);
+});
 
 
 // =========================================================
-// START PROCESSING
+// PROCESSING
 // =========================================================
 
 function startProcessing() {
@@ -700,10 +575,6 @@ function startProcessing() {
 }
 
 
-// =========================================================
-// STOP PROCESSING
-// =========================================================
-
 function stopProcessing() {
 
     progressBar.style.width =
@@ -713,18 +584,16 @@ function stopProcessing() {
         "Analysis complete";
 
 
-    setTimeout(
-        function () {
+    setTimeout(function () {
 
-            processingSection.classList.add(
-                "hidden"
-            );
+        processingSection.classList.add(
+            "hidden"
+        );
 
-            progressBar.style.width =
-                "0%";
-        },
-        700
-    );
+        progressBar.style.width =
+            "0%";
+
+    }, 700);
 
 
     scanBtn.disabled =
@@ -755,18 +624,14 @@ function displayResults(result) {
     // NOTES
     // =====================================================
 
-    if (
-        Array.isArray(
-            result.notes
-        )
-    ) {
+    if (Array.isArray(result.notes)) {
 
         additionalNotes.textContent =
             result.notes.length > 0
                 ? result.notes.join("\n")
                 : "No additional information.";
-    }
-    else {
+
+    } else {
 
         additionalNotes.textContent =
             result.notes ||
@@ -775,32 +640,24 @@ function displayResults(result) {
 
 
     // =====================================================
-    // CLEAR OLD FIELDS
+    // CLEAR PREVIOUS FIELDS
     // =====================================================
 
-    extractedFields.innerHTML =
-        "";
+    extractedFields.innerHTML = "";
 
 
     const fields =
-        result.fields ||
-        {};
+        result.fields || {};
 
 
     const entries =
-        Object.entries(
-            fields
-        );
+        Object.entries(fields);
 
 
-    if (
-        entries.length === 0
-    ) {
+    if (entries.length === 0) {
 
         const emptyMessage =
-            document.createElement(
-                "p"
-            );
+            document.createElement("p");
 
         emptyMessage.textContent =
             "No information could be extracted.";
@@ -815,140 +672,58 @@ function displayResults(result) {
 
 
     // =====================================================
-    // DISPLAY EACH EXTRACTED FIELD
+    // DISPLAY FIELDS
     // =====================================================
 
-    entries.forEach(
-        function ([key, value]) {
+    entries.forEach(function ([key, value]) {
 
-            /*
-                =============================================
-                MARKSHEET SUBJECT TABLE
-                =============================================
+        /*
+           ==================================================
+           UNIVERSAL EDUCATION SUBJECT DETECTION
 
-                If Nova returns:
+           Handles:
+           CBSE
+           CISCE / ICSE / ISC
+           AP SSC
+           Telangana SSC
+           State Boards
+           10th marksheets
+           12th marksheets
 
-                subjects: {
-                    firstLanguage: {
-                        name: "TELUGU",
-                        marksSecured: "90"
-                    },
-                    mathematics: {
-                        marksSecured: "92"
-                    }
-                }
+           It accepts both:
 
-                We show a table instead of JSON.
-            */
+           subjects: {...}
 
-            if (
-                key.toLowerCase() === "subjects" &&
-                value &&
-                typeof value === "object" &&
-                !Array.isArray(value)
-            ) {
+           AND
 
-                displaySubjectsTable(
-                    key,
-                    value
-                );
+           subjects: [...]
+           ==================================================
+        */
 
-                return;
-            }
+        if (
+            isSubjectField(key) &&
+            value &&
+            typeof value === "object"
+        ) {
 
-
-            // =================================================
-            // NORMAL FIELD
-            // =================================================
-
-            const row =
-                document.createElement(
-                    "div"
-                );
-
-
-            row.className =
-                "extracted-field";
-
-
-            const label =
-                document.createElement(
-                    "div"
-                );
-
-
-            label.className =
-                "field-name";
-
-
-            label.textContent =
-                formatFieldName(
-                    key
-                );
-
-
-            const content =
-                document.createElement(
-                    "div"
-                );
-
-
-            content.className =
-                "field-value";
-
-
-            if (
-                value === null ||
-                value === undefined ||
-                value === ""
-            ) {
-
-                content.textContent =
-                    "Not found";
-            }
-
-            else if (
-                typeof value ===
-                "object"
-            ) {
-
-                /*
-                    Other nested objects still display
-                    safely as formatted JSON.
-                */
-
-                content.textContent =
-                    JSON.stringify(
-                        value,
-                        null,
-                        2
-                    );
-            }
-
-            else {
-
-                content.textContent =
-                    String(
-                        value
-                    );
-            }
-
-
-            row.appendChild(
-                label
+            displaySubjectsTable(
+                key,
+                value
             );
 
-
-            row.appendChild(
-                content
-            );
-
-
-            extractedFields.appendChild(
-                row
-            );
+            return;
         }
-    );
+
+
+        // =================================================
+        // NORMAL FIELD
+        // =================================================
+
+        displayNormalField(
+            key,
+            value
+        );
+    });
 
 
     // =====================================================
@@ -961,17 +736,172 @@ function displayResults(result) {
 
 
     resultsSection.scrollIntoView({
-        behavior:
-            "smooth",
-
-        block:
-            "start"
+        behavior: "smooth",
+        block: "start"
     });
 }
 
 
 // =========================================================
-// DISPLAY SUBJECTS AS TABLE
+// DETECT SUBJECT FIELD
+// =========================================================
+
+function isSubjectField(key) {
+
+    const normalized =
+        String(key)
+            .toLowerCase()
+            .replace(/[\s_-]/g, "");
+
+
+    const possibleNames = [
+        "subjects",
+        "subjectdetails",
+        "subjectmarks",
+        "marks",
+        "markdetails",
+        "marksdetails",
+        "subjectwise",
+        "subjectwiseresults"
+    ];
+
+
+    return possibleNames.includes(
+        normalized
+    );
+}
+
+
+// =========================================================
+// NORMAL FIELD
+// =========================================================
+
+function displayNormalField(
+    key,
+    value
+) {
+
+    const row =
+        document.createElement("div");
+
+
+    row.className =
+        "extracted-field";
+
+
+    const label =
+        document.createElement("div");
+
+
+    label.className =
+        "field-name";
+
+
+    label.textContent =
+        formatFieldName(key);
+
+
+    const content =
+        document.createElement("div");
+
+
+    content.className =
+        "field-value";
+
+
+    if (
+        value === null ||
+        value === undefined ||
+        value === ""
+    ) {
+
+        content.textContent =
+            "Not found";
+
+    } else if (
+        typeof value === "object"
+    ) {
+
+        content.textContent =
+            formatObjectValue(value);
+
+    } else {
+
+        content.textContent =
+            String(value);
+    }
+
+
+    row.appendChild(label);
+
+    row.appendChild(content);
+
+    extractedFields.appendChild(row);
+}
+
+
+// =========================================================
+// FORMAT OTHER OBJECTS
+// =========================================================
+
+function formatObjectValue(value) {
+
+    if (Array.isArray(value)) {
+
+        return value
+            .map(function (item) {
+
+                if (
+                    item &&
+                    typeof item === "object"
+                ) {
+
+                    return Object.entries(item)
+                        .map(function ([key, val]) {
+
+                            return (
+                                formatFieldName(key) +
+                                ": " +
+                                String(val)
+                            );
+                        })
+                        .join(", ");
+                }
+
+                return String(item);
+            })
+            .join("\n");
+    }
+
+
+    return Object.entries(value)
+        .map(function ([key, val]) {
+
+            if (
+                val &&
+                typeof val === "object"
+            ) {
+
+                return (
+                    formatFieldName(key) +
+                    ": " +
+                    JSON.stringify(val)
+                );
+            }
+
+
+            return (
+                formatFieldName(key) +
+                ": " +
+                String(val)
+            );
+        })
+        .join("\n");
+}
+
+
+// =========================================================
+// UNIVERSAL MARKSHEET TABLE
 // =========================================================
 
 function displaySubjectsTable(
@@ -980,9 +910,7 @@ function displaySubjectsTable(
 ) {
 
     const container =
-        document.createElement(
-            "div"
-        );
+        document.createElement("div");
 
 
     container.className =
@@ -994,9 +922,7 @@ function displaySubjectsTable(
     // =====================================================
 
     const title =
-        document.createElement(
-            "div"
-        );
+        document.createElement("div");
 
 
     title.className =
@@ -1004,24 +930,239 @@ function displaySubjectsTable(
 
 
     title.textContent =
-        formatFieldName(
-            key
+        formatFieldName(key);
+
+
+    container.appendChild(title);
+
+
+    // =====================================================
+    // NORMALIZE DATA
+    // =====================================================
+
+    const subjectList =
+        normalizeSubjects(subjects);
+
+
+    if (subjectList.length === 0) {
+
+        const empty =
+            document.createElement("p");
+
+
+        empty.textContent =
+            "No subject information available.";
+
+
+        container.appendChild(empty);
+
+        extractedFields.appendChild(
+            container
+        );
+
+        return;
+    }
+
+
+    // =====================================================
+    // COLUMN DEFINITIONS
+    // =====================================================
+
+    const columnDefinitions = [
+
+        {
+            label: "Code",
+
+            keys: [
+                "subjectCode",
+                "subject_code",
+                "code",
+                "paperCode",
+                "paper_code"
+            ]
+        },
+
+
+        {
+            label: "Subject",
+
+            keys: [
+                "subjectName",
+                "subject_name",
+                "name",
+                "subject",
+                "paperName",
+                "paper_name",
+                "_subjectKey"
+            ]
+        },
+
+
+        {
+            label: "Theory",
+
+            keys: [
+                "theoryMarks",
+                "theory_marks",
+                "theory",
+                "writtenMarks",
+                "written_marks",
+                "written",
+                "externalMarks",
+                "external_marks"
+            ]
+        },
+
+
+        {
+            label: "Practical",
+
+            keys: [
+                "practicalMarks",
+                "practical_marks",
+                "practical",
+                "labMarks",
+                "lab_marks"
+            ]
+        },
+
+
+        {
+            label: "Internal",
+
+            keys: [
+                "internalAssessmentMarks",
+                "internal_assessment_marks",
+                "internalMarks",
+                "internal_marks",
+                "internalAssessment",
+                "internal_assessment",
+                "internal",
+                "sessionalMarks",
+                "sessional_marks"
+            ]
+        },
+
+
+        {
+            label: "Marks Secured",
+
+            keys: [
+                "marksSecured",
+                "marks_secured",
+                "marksObtained",
+                "marks_obtained",
+                "obtainedMarks",
+                "obtained_marks",
+                "score",
+                "marks"
+            ]
+        },
+
+
+        {
+            label: "Maximum Marks",
+
+            keys: [
+                "maximumMarks",
+                "maximum_marks",
+                "maxMarks",
+                "max_marks",
+                "maximum"
+            ]
+        },
+
+
+        {
+            label: "Total",
+
+            keys: [
+                "totalMarks",
+                "total_marks",
+                "total"
+            ]
+        },
+
+
+        {
+            label: "Grade",
+
+            keys: [
+                "grade",
+                "gradePoint",
+                "grade_point",
+                "resultGrade"
+            ]
+        },
+
+
+        {
+            label: "Result",
+
+            keys: [
+                "result",
+                "status",
+                "passFail",
+                "pass_fail"
+            ]
+        }
+    ];
+
+
+    // =====================================================
+    // DETERMINE WHICH COLUMNS EXIST
+    // =====================================================
+
+    const activeColumns =
+        columnDefinitions.filter(
+            function (column) {
+
+                return subjectList.some(
+                    function (subject) {
+
+                        return column.keys.some(
+                            function (fieldKey) {
+
+                                return hasUsableValue(
+                                    subject[fieldKey]
+                                );
+                            }
+                        );
+                    }
+                );
+            }
         );
 
 
-    container.appendChild(
-        title
-    );
+    // =====================================================
+    // FALLBACK
+    // =====================================================
+
+    if (activeColumns.length === 0) {
+
+        displayNormalField(
+            key,
+            subjects
+        );
+
+        return;
+    }
 
 
     // =====================================================
-    // TABLE
+    // TABLE WRAPPER
     // =====================================================
+
+    const tableWrapper =
+        document.createElement("div");
+
+
+    tableWrapper.className =
+        "marks-table-wrapper";
+
 
     const table =
-        document.createElement(
-            "table"
-        );
+        document.createElement("table");
 
 
     table.className =
@@ -1029,59 +1170,36 @@ function displaySubjectsTable(
 
 
     // =====================================================
-    // TABLE HEADER
+    // HEADER
     // =====================================================
 
     const thead =
-        document.createElement(
-            "thead"
-        );
+        document.createElement("thead");
 
 
-    const headingRow =
-        document.createElement(
-            "tr"
-        );
+    const headerRow =
+        document.createElement("tr");
 
 
-    const subjectHeading =
-        document.createElement(
-            "th"
-        );
+    activeColumns.forEach(
+        function (column) {
+
+            const th =
+                document.createElement("th");
 
 
-    subjectHeading.textContent =
-        "Subject";
+            th.textContent =
+                column.label;
 
 
-    const marksHeading =
-        document.createElement(
-            "th"
-        );
-
-
-    marksHeading.textContent =
-        "Marks Secured";
-
-
-    headingRow.appendChild(
-        subjectHeading
+            headerRow.appendChild(th);
+        }
     );
 
 
-    headingRow.appendChild(
-        marksHeading
-    );
+    thead.appendChild(headerRow);
 
-
-    thead.appendChild(
-        headingRow
-    );
-
-
-    table.appendChild(
-        thead
-    );
+    table.appendChild(thead);
 
 
     // =====================================================
@@ -1089,106 +1207,68 @@ function displaySubjectsTable(
     // =====================================================
 
     const tbody =
-        document.createElement(
-            "tbody"
-        );
+        document.createElement("tbody");
 
 
-    Object.entries(
-        subjects
-    ).forEach(
-        function (
-            [subjectKey, subjectData]
-        ) {
+    subjectList.forEach(
+        function (subject) {
 
-            const tableRow =
-                document.createElement(
-                    "tr"
-                );
+            const row =
+                document.createElement("tr");
 
 
-            const subjectCell =
-                document.createElement(
-                    "td"
-                );
+            activeColumns.forEach(
+                function (column) {
+
+                    const cell =
+                        document.createElement("td");
 
 
-            const marksCell =
-                document.createElement(
-                    "td"
-                );
+                    let cellValue =
+                        findFirstValue(
+                            subject,
+                            column.keys
+                        );
 
 
-            // =============================================
-            // NESTED SUBJECT OBJECT
-            // =============================================
+                    if (
+                        column.label === "Subject" &&
+                        cellValue &&
+                        subject._subjectKey ===
+                            cellValue
+                    ) {
 
-            if (
-                subjectData &&
-                typeof subjectData ===
-                "object" &&
-                !Array.isArray(
-                    subjectData
-                )
-            ) {
-
-                subjectCell.textContent =
-                    subjectData.name ||
-                    subjectData.subject ||
-                    formatFieldName(
-                        subjectKey
-                    );
+                        cellValue =
+                            formatFieldName(
+                                cellValue
+                            );
+                    }
 
 
-                marksCell.textContent =
-                    getMarksValue(
-                        subjectData
-                    );
-            }
-
-            // =============================================
-            // SIMPLE VALUE
-            // Example: mathematics: "92"
-            // =============================================
-
-            else {
-
-                subjectCell.textContent =
-                    formatFieldName(
-                        subjectKey
-                    );
+                    cell.textContent =
+                        hasUsableValue(
+                            cellValue
+                        )
+                            ? String(cellValue)
+                            : "—";
 
 
-                marksCell.textContent =
-                    subjectData ??
-                    "Not found";
-            }
-
-
-            tableRow.appendChild(
-                subjectCell
+                    row.appendChild(cell);
+                }
             );
 
 
-            tableRow.appendChild(
-                marksCell
-            );
-
-
-            tbody.appendChild(
-                tableRow
-            );
+            tbody.appendChild(row);
         }
     );
 
 
-    table.appendChild(
-        tbody
-    );
+    table.appendChild(tbody);
 
+    tableWrapper.appendChild(table);
 
     container.appendChild(
-        table
+        tableWrapper
     );
 
 
@@ -1199,44 +1279,162 @@ function displaySubjectsTable(
 
 
 // =========================================================
-// FIND MARKS VALUE
+// NORMALIZE SUBJECT DATA
 // =========================================================
 
-function getMarksValue(subjectData) {
+function normalizeSubjects(subjects) {
 
     /*
-        Supports slightly different field names
-        that Nova might return.
+       -----------------------------------------------------
+       FORMAT 1 — CBSE / ICSE style
+
+       subjects: [
+           {
+               subjectCode: "184",
+               subjectName: "ENGLISH",
+               theoryMarks: "052",
+               internalAssessmentMarks: "019",
+               totalMarks: "071",
+               grade: "C1"
+           }
+       ]
+       -----------------------------------------------------
     */
 
-    const possibleKeys = [
-        "marksSecured",
-        "marks",
-        "score",
-        "marksObtained",
-        "obtainedMarks",
-        "grade"
-    ];
+    if (Array.isArray(subjects)) {
+
+        return subjects
+            .filter(function (subject) {
+
+                return (
+                    subject !== null &&
+                    subject !== undefined
+                );
+            })
+            .map(function (subject, index) {
+
+                if (
+                    subject &&
+                    typeof subject === "object"
+                ) {
+
+                    return subject;
+                }
 
 
-    for (
-        const key of possibleKeys
+                return {
+                    _subjectKey:
+                        "Subject " +
+                        (index + 1),
+
+                    marksSecured:
+                        subject
+                };
+            });
+    }
+
+
+    /*
+       -----------------------------------------------------
+       FORMAT 2 — State Board style
+
+       subjects: {
+
+           firstLanguage: {
+               name: "TELUGU",
+               marksSecured: "90"
+           },
+
+           mathematics: {
+               marksSecured: "92"
+           }
+       }
+       -----------------------------------------------------
+    */
+
+    if (
+        subjects &&
+        typeof subjects === "object"
     ) {
 
+        return Object.entries(subjects)
+            .map(
+                function (
+                    [subjectKey, subjectData]
+                ) {
+
+                    if (
+                        subjectData &&
+                        typeof subjectData ===
+                            "object" &&
+                        !Array.isArray(
+                            subjectData
+                        )
+                    ) {
+
+                        return {
+                            _subjectKey:
+                                subjectKey,
+
+                            ...subjectData
+                        };
+                    }
+
+
+                    return {
+
+                        _subjectKey:
+                            subjectKey,
+
+                        marksSecured:
+                            subjectData
+                    };
+                }
+            );
+    }
+
+
+    return [];
+}
+
+
+// =========================================================
+// FIND FIRST MATCHING VALUE
+// =========================================================
+
+function findFirstValue(
+    object,
+    keys
+) {
+
+    for (const key of keys) {
+
         if (
-            subjectData[key] !== undefined &&
-            subjectData[key] !== null &&
-            subjectData[key] !== ""
+            hasUsableValue(
+                object[key]
+            )
         ) {
 
-            return String(
-                subjectData[key]
-            );
+            return object[key];
         }
     }
 
 
-    return "Not found";
+    return null;
+}
+
+
+// =========================================================
+// CHECK VALUE
+// =========================================================
+
+function hasUsableValue(value) {
+
+    return (
+        value !== undefined &&
+        value !== null &&
+        value !== ""
+    );
 }
 
 
@@ -1248,10 +1446,7 @@ function formatFieldName(name) {
 
     return String(name)
 
-        .replace(
-            /_/g,
-            " "
-        )
+        .replace(/_/g, " ")
 
         .replace(
             /([a-z])([A-Z])/g,
@@ -1276,10 +1471,7 @@ downloadBtn.addEventListener(
     "click",
     function () {
 
-        if (
-            !latestResult
-        ) {
-
+        if (!latestResult) {
             return;
         }
 
@@ -1309,9 +1501,7 @@ downloadBtn.addEventListener(
 
 
         const link =
-            document.createElement(
-                "a"
-            );
+            document.createElement("a");
 
 
         link.href =
@@ -1329,12 +1519,8 @@ downloadBtn.addEventListener(
 
         link.click();
 
-
         link.remove();
 
-
-        URL.revokeObjectURL(
-            url
-        );
+        URL.revokeObjectURL(url);
     }
 );
