@@ -873,3 +873,19 @@ button {
     }
 
 }
+/* Family logo at top of scanner */
+
+.brand-logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.brand-logo img {
+    display: block;
+    width: auto;
+    max-width: 220px;
+    max-height: 90px;
+    object-fit: contain;
+}
