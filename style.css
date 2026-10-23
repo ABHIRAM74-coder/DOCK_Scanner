@@ -889,3 +889,77 @@ button {
     max-height: 90px;
     object-fit: contain;
 }
+/* =========================================================
+   MARKSHEET TABLE
+   ========================================================= */
+
+.marksheet-table-container {
+    width: 100%;
+    margin-top: 8px;
+    margin-bottom: 20px;
+}
+
+.marksheet-table-title {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 14px;
+    opacity: 0.8;
+}
+
+.marks-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    overflow: hidden;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.marks-table thead {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.marks-table th {
+    padding: 15px 18px;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.marks-table td {
+    padding: 15px 18px;
+    text-align: left;
+    font-size: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.marks-table th:last-child,
+.marks-table td:last-child {
+    width: 180px;
+    text-align: center;
+}
+
+.marks-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.marks-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.035);
+}
+
+@media (max-width: 600px) {
+
+    .marks-table th,
+    .marks-table td {
+        padding: 12px 10px;
+        font-size: 13px;
+    }
+
+    .marks-table th:last-child,
+    .marks-table td:last-child {
+        width: 110px;
+    }
+}

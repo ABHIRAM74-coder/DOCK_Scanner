@@ -20,7 +20,6 @@ const API_URL =
 // FILE SETTINGS
 // =========================================================
 
-// These are the formats currently supported by our Lambda.
 const ALLOWED_EXTENSIONS = new Set([
     "pdf",
     "docx",
@@ -98,7 +97,6 @@ const downloadBtn =
 // =========================================================
 
 let currentFile = null;
-
 let latestResult = null;
 
 
@@ -109,9 +107,7 @@ let latestResult = null;
 chooseFileBtn.addEventListener(
     "click",
     function () {
-
         fileInput.click();
-
     }
 );
 
@@ -128,13 +124,10 @@ fileInput.addEventListener(
             fileInput.files &&
             fileInput.files.length > 0
         ) {
-
             handleFile(
                 fileInput.files[0]
             );
-
         }
-
     }
 );
 
@@ -154,16 +147,13 @@ fileInput.addEventListener(
             function (event) {
 
                 event.preventDefault();
-
                 event.stopPropagation();
 
                 dropArea.classList.add(
                     "dragging"
                 );
-
             }
         );
-
     }
 );
 
@@ -179,16 +169,13 @@ fileInput.addEventListener(
             function (event) {
 
                 event.preventDefault();
-
                 event.stopPropagation();
 
                 dropArea.classList.remove(
                     "dragging"
                 );
-
             }
         );
-
     }
 );
 
@@ -208,13 +195,10 @@ dropArea.addEventListener(
             files &&
             files.length > 0
         ) {
-
             handleFile(
                 files[0]
             );
-
         }
-
     }
 );
 
@@ -226,9 +210,7 @@ dropArea.addEventListener(
 function handleFile(file) {
 
     clearError();
-
     hideResults();
-
 
     const extension =
         getFileExtension(
@@ -244,14 +226,12 @@ function handleFile(file) {
 
         showError(
             "Unsupported file type. " +
-            "Currently supported: PDF, DOCX, TXT, " +
-            "JPG, JPEG and PNG."
+            "Currently supported: PDF, DOCX, TXT, JPG, JPEG and PNG."
         );
 
         resetFile();
 
         return;
-
     }
 
 
@@ -266,7 +246,6 @@ function handleFile(file) {
         resetFile();
 
         return;
-
     }
 
 
@@ -282,30 +261,24 @@ function handleFile(file) {
         resetFile();
 
         return;
-
     }
 
 
     currentFile = file;
 
-
     fileName.textContent =
         file.name;
-
 
     fileSize.textContent =
         formatFileSize(
             file.size
         );
 
-
     selectedFile.classList.remove(
         "hidden"
     );
 
-
     scanBtn.disabled = false;
-
 }
 
 
@@ -320,18 +293,13 @@ function getFileExtension(name) {
             .toLowerCase()
             .split(".");
 
-
     if (
         pieces.length < 2
     ) {
-
         return "";
-
     }
 
-
     return pieces.pop();
-
 }
 
 
@@ -349,7 +317,6 @@ function formatFileSize(bytes) {
             bytes +
             " bytes"
         );
-
     }
 
 
@@ -365,7 +332,6 @@ function formatFileSize(bytes) {
             ).toFixed(2) +
             " KB"
         );
-
     }
 
 
@@ -377,7 +343,6 @@ function formatFileSize(bytes) {
         ).toFixed(2) +
         " MB"
     );
-
 }
 
 
@@ -390,11 +355,8 @@ removeFileBtn.addEventListener(
     function () {
 
         resetFile();
-
         clearError();
-
         hideResults();
-
     }
 );
 
@@ -406,13 +368,11 @@ removeFileBtn.addEventListener(
 function resetFile() {
 
     currentFile = null;
-
     latestResult = null;
 
     fileInput.value = "";
 
     fileName.textContent = "";
-
     fileSize.textContent = "";
 
     selectedFile.classList.add(
@@ -427,7 +387,6 @@ function resetFile() {
 
     progressBar.style.width =
         "0%";
-
 }
 
 
@@ -443,7 +402,6 @@ function showError(message) {
     errorMessage.classList.remove(
         "hidden"
     );
-
 }
 
 
@@ -458,7 +416,6 @@ function clearError() {
     errorMessage.classList.add(
         "hidden"
     );
-
 }
 
 
@@ -471,7 +428,6 @@ function hideResults() {
     resultsSection.classList.add(
         "hidden"
     );
-
 }
 
 
@@ -506,16 +462,13 @@ function fileToBase64(file) {
                         resolve(
                             base64
                         );
-
                     }
                     catch (error) {
 
                         reject(
                             error
                         );
-
                     }
-
                 };
 
 
@@ -527,17 +480,14 @@ function fileToBase64(file) {
                             "Unable to read the selected file."
                         )
                     );
-
                 };
 
 
             reader.readAsDataURL(
                 file
             );
-
         }
     );
-
 }
 
 
@@ -558,14 +508,11 @@ scanBtn.addEventListener(
             );
 
             return;
-
         }
 
 
         clearError();
-
         hideResults();
-
         startProcessing();
 
 
@@ -627,14 +574,12 @@ scanBtn.addEventListener(
 
                 responseData =
                     await apiResponse.json();
-
             }
             catch (error) {
 
                 throw new Error(
                     "The server returned an invalid response."
                 );
-
             }
 
 
@@ -646,19 +591,10 @@ scanBtn.addEventListener(
                     responseData.error ||
                     "Document analysis failed."
                 );
-
             }
 
 
-            /*
-                API Gateway normally returns the Lambda
-                proxy response directly.
-
-                This extra check also makes the frontend
-                tolerant if the Lambda body arrives as
-                a JSON string.
-            */
-
+            // Handle Lambda proxy body if returned as string
             if (
                 typeof responseData.body ===
                 "string"
@@ -670,14 +606,11 @@ scanBtn.addEventListener(
                         JSON.parse(
                             responseData.body
                         );
-
                 }
                 catch (error) {
 
-                    // Leave responseData unchanged.
-
+                    // Leave responseData unchanged
                 }
-
             }
 
 
@@ -689,7 +622,6 @@ scanBtn.addEventListener(
                     responseData.error ||
                     "Document analysis failed."
                 );
-
             }
 
 
@@ -700,7 +632,6 @@ scanBtn.addEventListener(
                 throw new Error(
                     "No analysis result was returned."
                 );
-
             }
 
 
@@ -718,7 +649,6 @@ scanBtn.addEventListener(
 
 
             stopProcessing();
-
         }
         catch (error) {
 
@@ -745,15 +675,13 @@ scanBtn.addEventListener(
                 error.message ||
                 "Unable to analyze the document."
             );
-
         }
-
     }
 );
 
 
 // =========================================================
-// DISPLAY PROCESSING STATE
+// START PROCESSING
 // =========================================================
 
 function startProcessing() {
@@ -769,7 +697,6 @@ function startProcessing() {
 
     processingText.textContent =
         "Preparing document...";
-
 }
 
 
@@ -795,7 +722,6 @@ function stopProcessing() {
 
             progressBar.style.width =
                 "0%";
-
         },
         700
     );
@@ -803,7 +729,6 @@ function stopProcessing() {
 
     scanBtn.disabled =
         !currentFile;
-
 }
 
 
@@ -826,7 +751,10 @@ function displayResults(result) {
         "Unknown";
 
 
-    // Notes from Lambda are an array.
+    // =====================================================
+    // NOTES
+    // =====================================================
+
     if (
         Array.isArray(
             result.notes
@@ -837,16 +765,18 @@ function displayResults(result) {
             result.notes.length > 0
                 ? result.notes.join("\n")
                 : "No additional information.";
-
     }
     else {
 
         additionalNotes.textContent =
             result.notes ||
             "No additional information.";
-
     }
 
+
+    // =====================================================
+    // CLEAR OLD FIELDS
+    // =====================================================
 
     extractedFields.innerHTML =
         "";
@@ -872,26 +802,64 @@ function displayResults(result) {
                 "p"
             );
 
-
         emptyMessage.textContent =
             "No information could be extracted.";
-
 
         emptyMessage.className =
             "additional-notes";
 
-
         extractedFields.appendChild(
             emptyMessage
         );
-
     }
 
 
+    // =====================================================
+    // DISPLAY EACH EXTRACTED FIELD
+    // =====================================================
+
     entries.forEach(
-        function (
-            [key, value]
-        ) {
+        function ([key, value]) {
+
+            /*
+                =============================================
+                MARKSHEET SUBJECT TABLE
+                =============================================
+
+                If Nova returns:
+
+                subjects: {
+                    firstLanguage: {
+                        name: "TELUGU",
+                        marksSecured: "90"
+                    },
+                    mathematics: {
+                        marksSecured: "92"
+                    }
+                }
+
+                We show a table instead of JSON.
+            */
+
+            if (
+                key.toLowerCase() === "subjects" &&
+                value &&
+                typeof value === "object" &&
+                !Array.isArray(value)
+            ) {
+
+                displaySubjectsTable(
+                    key,
+                    value
+                );
+
+                return;
+            }
+
+
+            // =================================================
+            // NORMAL FIELD
+            // =================================================
 
             const row =
                 document.createElement(
@@ -937,7 +905,6 @@ function displayResults(result) {
 
                 content.textContent =
                     "Not found";
-
             }
 
             else if (
@@ -945,13 +912,17 @@ function displayResults(result) {
                 "object"
             ) {
 
+                /*
+                    Other nested objects still display
+                    safely as formatted JSON.
+                */
+
                 content.textContent =
                     JSON.stringify(
                         value,
                         null,
                         2
                     );
-
             }
 
             else {
@@ -960,7 +931,6 @@ function displayResults(result) {
                     String(
                         value
                     );
-
             }
 
 
@@ -977,10 +947,13 @@ function displayResults(result) {
             extractedFields.appendChild(
                 row
             );
-
         }
     );
 
+
+    // =====================================================
+    // SHOW RESULTS
+    // =====================================================
 
     resultsSection.classList.remove(
         "hidden"
@@ -994,7 +967,276 @@ function displayResults(result) {
         block:
             "start"
     });
+}
 
+
+// =========================================================
+// DISPLAY SUBJECTS AS TABLE
+// =========================================================
+
+function displaySubjectsTable(
+    key,
+    subjects
+) {
+
+    const container =
+        document.createElement(
+            "div"
+        );
+
+
+    container.className =
+        "marksheet-table-container";
+
+
+    // =====================================================
+    // TITLE
+    // =====================================================
+
+    const title =
+        document.createElement(
+            "div"
+        );
+
+
+    title.className =
+        "marksheet-table-title";
+
+
+    title.textContent =
+        formatFieldName(
+            key
+        );
+
+
+    container.appendChild(
+        title
+    );
+
+
+    // =====================================================
+    // TABLE
+    // =====================================================
+
+    const table =
+        document.createElement(
+            "table"
+        );
+
+
+    table.className =
+        "marks-table";
+
+
+    // =====================================================
+    // TABLE HEADER
+    // =====================================================
+
+    const thead =
+        document.createElement(
+            "thead"
+        );
+
+
+    const headingRow =
+        document.createElement(
+            "tr"
+        );
+
+
+    const subjectHeading =
+        document.createElement(
+            "th"
+        );
+
+
+    subjectHeading.textContent =
+        "Subject";
+
+
+    const marksHeading =
+        document.createElement(
+            "th"
+        );
+
+
+    marksHeading.textContent =
+        "Marks Secured";
+
+
+    headingRow.appendChild(
+        subjectHeading
+    );
+
+
+    headingRow.appendChild(
+        marksHeading
+    );
+
+
+    thead.appendChild(
+        headingRow
+    );
+
+
+    table.appendChild(
+        thead
+    );
+
+
+    // =====================================================
+    // TABLE BODY
+    // =====================================================
+
+    const tbody =
+        document.createElement(
+            "tbody"
+        );
+
+
+    Object.entries(
+        subjects
+    ).forEach(
+        function (
+            [subjectKey, subjectData]
+        ) {
+
+            const tableRow =
+                document.createElement(
+                    "tr"
+                );
+
+
+            const subjectCell =
+                document.createElement(
+                    "td"
+                );
+
+
+            const marksCell =
+                document.createElement(
+                    "td"
+                );
+
+
+            // =============================================
+            // NESTED SUBJECT OBJECT
+            // =============================================
+
+            if (
+                subjectData &&
+                typeof subjectData ===
+                "object" &&
+                !Array.isArray(
+                    subjectData
+                )
+            ) {
+
+                subjectCell.textContent =
+                    subjectData.name ||
+                    subjectData.subject ||
+                    formatFieldName(
+                        subjectKey
+                    );
+
+
+                marksCell.textContent =
+                    getMarksValue(
+                        subjectData
+                    );
+            }
+
+            // =============================================
+            // SIMPLE VALUE
+            // Example: mathematics: "92"
+            // =============================================
+
+            else {
+
+                subjectCell.textContent =
+                    formatFieldName(
+                        subjectKey
+                    );
+
+
+                marksCell.textContent =
+                    subjectData ??
+                    "Not found";
+            }
+
+
+            tableRow.appendChild(
+                subjectCell
+            );
+
+
+            tableRow.appendChild(
+                marksCell
+            );
+
+
+            tbody.appendChild(
+                tableRow
+            );
+        }
+    );
+
+
+    table.appendChild(
+        tbody
+    );
+
+
+    container.appendChild(
+        table
+    );
+
+
+    extractedFields.appendChild(
+        container
+    );
+}
+
+
+// =========================================================
+// FIND MARKS VALUE
+// =========================================================
+
+function getMarksValue(subjectData) {
+
+    /*
+        Supports slightly different field names
+        that Nova might return.
+    */
+
+    const possibleKeys = [
+        "marksSecured",
+        "marks",
+        "score",
+        "marksObtained",
+        "obtainedMarks",
+        "grade"
+    ];
+
+
+    for (
+        const key of possibleKeys
+    ) {
+
+        if (
+            subjectData[key] !== undefined &&
+            subjectData[key] !== null &&
+            subjectData[key] !== ""
+        ) {
+
+            return String(
+                subjectData[key]
+            );
+        }
+    }
+
+
+    return "Not found";
 }
 
 
@@ -1021,10 +1263,8 @@ function formatFieldName(name) {
             function (letter) {
 
                 return letter.toUpperCase();
-
             }
         );
-
 }
 
 
@@ -1041,7 +1281,6 @@ downloadBtn.addEventListener(
         ) {
 
             return;
-
         }
 
 
@@ -1097,6 +1336,5 @@ downloadBtn.addEventListener(
         URL.revokeObjectURL(
             url
         );
-
     }
 );
