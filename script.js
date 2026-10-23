@@ -7,7 +7,7 @@
 
 
 // =========================================================
-// API CONFIGURATION
+// API
 // =========================================================
 
 const API_URL =
@@ -15,7 +15,7 @@ const API_URL =
 
 
 // =========================================================
-// FILE CONFIGURATION
+// FILE SETTINGS
 // =========================================================
 
 const ALLOWED_EXTENSIONS = new Set([
@@ -32,7 +32,7 @@ const MAX_FILE_SIZE =
 
 
 // =========================================================
-// HTML ELEMENTS
+// ELEMENTS
 // =========================================================
 
 const fileInput =
@@ -95,7 +95,10 @@ const downloadBtn =
 // =========================================================
 
 let currentFile = null;
+
 let latestResult = null;
+
+let latestExecution = null;
 
 
 // =========================================================
@@ -133,7 +136,7 @@ fileInput.addEventListener(
 
 
 // =========================================================
-// DRAG AND DROP
+// DRAG & DROP
 // =========================================================
 
 [
@@ -201,7 +204,7 @@ dropArea.addEventListener(
 
 
 // =========================================================
-// HANDLE FILE
+// FILE VALIDATION
 // =========================================================
 
 function handleFile(file) {
@@ -285,7 +288,7 @@ function handleFile(file) {
 
 
 // =========================================================
-// GET EXTENSION
+// EXTENSION
 // =========================================================
 
 function getFileExtension(name) {
@@ -309,7 +312,7 @@ function getFileExtension(name) {
 
 
 // =========================================================
-// FORMAT FILE SIZE
+// FILE SIZE
 // =========================================================
 
 function formatFileSize(bytes) {
@@ -367,7 +370,7 @@ removeFileBtn.addEventListener(
 
 
 // =========================================================
-// RESET FILE
+// RESET
 // =========================================================
 
 function resetFile() {
@@ -376,6 +379,9 @@ function resetFile() {
         null;
 
     latestResult =
+        null;
+
+    latestExecution =
         null;
 
 
@@ -410,7 +416,7 @@ function resetFile() {
 
 
 // =========================================================
-// ERROR HANDLING
+// ERROR
 // =========================================================
 
 function showError(message) {
@@ -450,7 +456,7 @@ function hideResults() {
 
 
 // =========================================================
-// FILE → BASE64
+// BASE64
 // =========================================================
 
 function fileToBase64(file) {
@@ -475,8 +481,9 @@ function fileToBase64(file) {
 
 
                         const base64 =
-                            result
-                                .split(",")[1];
+                            result.split(
+                                ","
+                            )[1];
 
 
                         resolve(
@@ -512,7 +519,7 @@ function fileToBase64(file) {
 
 
 // =========================================================
-// SCAN DOCUMENT
+// SCAN
 // =========================================================
 
 scanBtn.addEventListener(
@@ -618,7 +625,7 @@ scanBtn.addEventListener(
 
 
             // =================================================
-            // HANDLE LAMBDA PROXY RESPONSE
+            // LAMBDA PROXY BODY
             // =================================================
 
             if (
@@ -636,7 +643,7 @@ scanBtn.addEventListener(
                 } catch (error) {
 
                     console.warn(
-                        "Unable to parse nested Lambda body."
+                        "Could not parse nested Lambda response."
                     );
                 }
             }
@@ -663,6 +670,11 @@ scanBtn.addEventListener(
             }
 
 
+            latestExecution =
+                responseData.execution ||
+                null;
+
+
             progressBar.style.width =
                 "100%";
 
@@ -672,7 +684,8 @@ scanBtn.addEventListener(
 
 
             displayResults(
-                responseData.result
+                responseData.result,
+                latestExecution
             );
 
 
@@ -767,7 +780,10 @@ function stopProcessing() {
 // DISPLAY RESULTS
 // =========================================================
 
-function displayResults(result) {
+function displayResults(
+    result,
+    execution
+) {
 
     latestResult =
         result;
@@ -845,7 +861,8 @@ function displayResults(result) {
                     normalizedKey
                 ) &&
                 value &&
-                typeof value === "object"
+                typeof value ===
+                    "object"
             ) {
 
                 displayPhysicalCharacteristics(
@@ -858,7 +875,7 @@ function displayResults(result) {
 
 
             // =================================================
-            // EDUCATION SUBJECT TABLE
+            // EDUCATION SUBJECTS
             // =================================================
 
             if (
@@ -877,16 +894,26 @@ function displayResults(result) {
             }
 
 
-            // =================================================
-            // NORMAL FIELD
-            // =================================================
-
             displayNormalField(
                 key,
                 value
             );
         }
     );
+
+
+    // =====================================================
+    // EXECUTION INFORMATION AT VERY BOTTOM
+    // =====================================================
+
+    if (
+        execution
+    ) {
+
+        displayExecutionDetails(
+            execution
+        );
+    }
 
 
     resultsSection.classList.remove(
@@ -936,7 +963,7 @@ function displayNotes(notes) {
 
 
 // =========================================================
-// DETECT PHYSICAL CHARACTERISTICS
+// PHYSICAL CHARACTERISTICS DETECTION
 // =========================================================
 
 function isPhysicalCharacteristicsField(
@@ -958,7 +985,6 @@ function isPhysicalCharacteristicsField(
             "personalidentificationmarks",
 
             "physicalmarks"
-
         ]);
 
 
@@ -969,7 +995,7 @@ function isPhysicalCharacteristicsField(
 
 
 // =========================================================
-// DISPLAY PHYSICAL CHARACTERISTICS
+// PHYSICAL CHARACTERISTICS DISPLAY
 // =========================================================
 
 function displayPhysicalCharacteristics(
@@ -986,10 +1012,6 @@ function displayPhysicalCharacteristics(
     container.className =
         "physical-characteristics-container";
 
-
-    // =====================================================
-    // TITLE
-    // =====================================================
 
     const title =
         document.createElement(
@@ -1012,21 +1034,20 @@ function displayPhysicalCharacteristics(
     );
 
 
-    // =====================================================
-    // PHYSICAL CHARACTERISTIC ROWS
-    // =====================================================
-
     Object.entries(
         value
     ).forEach(
         function (
-            [fieldKey, fieldValue]
+            [
+                fieldKey,
+                fieldValue
+            ]
         ) {
 
             if (
-                fieldValue === null ||
-                fieldValue === undefined ||
-                fieldValue === ""
+                !hasValue(
+                    fieldValue
+                )
             ) {
 
                 return;
@@ -1099,7 +1120,7 @@ function displayPhysicalCharacteristics(
 
 
 // =========================================================
-// DETECT EDUCATION SUBJECT COLLECTION
+// EDUCATION DETECTION
 // =========================================================
 
 function isEducationSubjectCollection(
@@ -1109,7 +1130,8 @@ function isEducationSubjectCollection(
 
     if (
         !value ||
-        typeof value !== "object"
+        typeof value !==
+            "object"
     ) {
 
         return false;
@@ -1121,10 +1143,6 @@ function isEducationSubjectCollection(
             key
         );
 
-
-    // =====================================================
-    // EXPLICITLY NON-ACADEMIC
-    // =====================================================
 
     const nonAcademicFields =
         new Set([
@@ -1147,7 +1165,6 @@ function isEducationSubjectCollection(
 
             "contactdetails",
             "personalinformation"
-
         ]);
 
 
@@ -1160,10 +1177,6 @@ function isEducationSubjectCollection(
         return false;
     }
 
-
-    // =====================================================
-    // KNOWN ACADEMIC COLLECTION NAMES
-    // =====================================================
 
     const knownSubjectKeys =
         new Set([
@@ -1189,7 +1202,6 @@ function isEducationSubjectCollection(
 
             "markdetails",
             "marksdetails"
-
         ]);
 
 
@@ -1202,10 +1214,6 @@ function isEducationSubjectCollection(
         return true;
     }
 
-
-    // =====================================================
-    // STRUCTURAL DETECTION
-    // =====================================================
 
     const rows =
         normalizeEducationRows(
@@ -1220,24 +1228,6 @@ function isEducationSubjectCollection(
         return false;
     }
 
-
-    /*
-        IMPORTANT:
-
-        We intentionally DO NOT use generic words such as:
-
-        "mark"
-        "marks"
-
-        as academic indicators.
-
-        Otherwise:
-
-        identificationMark1
-        identificationMark2
-
-        could incorrectly become academic marks.
-    */
 
     const strongAcademicIndicators = [
 
@@ -1297,7 +1287,7 @@ function isEducationSubjectCollection(
 
 
 // =========================================================
-// UNIVERSAL EDUCATION TABLE
+// EDUCATION TABLE
 // =========================================================
 
 function renderEducationTable(
@@ -1345,9 +1335,7 @@ function renderEducationTable(
 
 
     title.textContent =
-        getEducationTableTitle(
-            key
-        );
+        "Subjects & Marks";
 
 
     container.appendChild(
@@ -1355,85 +1343,60 @@ function renderEducationTable(
     );
 
 
-    // =====================================================
-    // UNIVERSAL EDUCATION COLUMNS
-    // =====================================================
-
     const definitions = [
 
         {
-            label:
-                "Code",
+            label: "Code",
 
             aliases: [
-
                 "subjectCode",
                 "subject_code",
-
                 "paperCode",
                 "paper_code",
-
                 "code"
             ]
         },
 
 
         {
-            label:
-                "Subject",
+            label: "Subject",
 
             aliases: [
-
                 "subjectName",
                 "subject_name",
-
                 "paperName",
                 "paper_name",
-
                 "subject",
                 "name",
-
                 "_subjectKey"
             ]
         },
 
 
         {
-            label:
-                "Theory",
+            label: "Theory",
 
             aliases: [
-
                 "theoryMarks",
                 "theory_marks",
-
                 "theoryObtained",
                 "theory_obtained",
-
                 "theory",
-
                 "writtenMarks",
-                "written_marks",
-
-                "written"
+                "written_marks"
             ]
         },
 
 
         {
-            label:
-                "Practical",
+            label: "Practical",
 
             aliases: [
-
                 "practicalMarks",
                 "practical_marks",
-
                 "practicalObtained",
                 "practical_obtained",
-
                 "practical",
-
                 "labMarks",
                 "lab_marks"
             ]
@@ -1441,20 +1404,15 @@ function renderEducationTable(
 
 
         {
-            label:
-                "Internal",
+            label: "Internal",
 
             aliases: [
-
                 "internalAssessmentMarks",
                 "internal_assessment_marks",
-
                 "internalMarks",
                 "internal_marks",
-
                 "internalObtained",
                 "internal_obtained",
-
                 "internalAssessment",
                 "internal"
             ]
@@ -1462,56 +1420,41 @@ function renderEducationTable(
 
 
         {
-            label:
-                "External",
+            label: "External",
 
             aliases: [
-
                 "externalMarks",
                 "external_marks",
-
                 "externalObtained",
                 "external_obtained",
-
                 "external"
             ]
         },
 
 
         {
-            label:
-                "Maximum Marks",
+            label: "Maximum Marks",
 
             aliases: [
-
                 "maximumMarks",
                 "maximum_marks",
-
                 "maxMarks",
                 "max_marks",
-
-                "maximum",
-
-                "totalMaximumMarks"
+                "maximum"
             ]
         },
 
 
         {
-            label:
-                "Marks Obtained",
+            label: "Marks Obtained",
 
             aliases: [
-
                 "marksSecured",
                 "marks_secured",
-
                 "marksObtained",
                 "marks_obtained",
-
                 "obtainedMarks",
                 "obtained_marks",
-
                 "score",
                 "marks"
             ]
@@ -1519,54 +1462,40 @@ function renderEducationTable(
 
 
         {
-            label:
-                "Total",
+            label: "Total",
 
             aliases: [
-
                 "totalMarks",
                 "total_marks",
-
                 "subjectTotal",
                 "subject_total",
-
                 "total"
             ]
         },
 
 
         {
-            label:
-                "Marks In Words",
+            label: "Marks In Words",
 
             aliases: [
-
                 "marksInWords",
                 "marks_in_words",
-
                 "totalInWords",
                 "total_in_words",
-
-                "obtainedMarksInWords",
-                "obtained_marks_in_words"
+                "obtainedMarksInWords"
             ]
         },
 
 
         {
-            label:
-                "Grade",
+            label: "Grade",
 
             aliases: [
-
                 "grade",
-
                 "gradePoint",
                 "grade_point",
-
                 "letterGrade",
                 "letter_grade",
-
                 "positionalGrade",
                 "positional_grade"
             ]
@@ -1574,24 +1503,17 @@ function renderEducationTable(
 
 
         {
-            label:
-                "Result",
+            label: "Result",
 
             aliases: [
-
                 "result",
                 "status",
-
                 "passFail",
                 "pass_fail"
             ]
         }
     ];
 
-
-    // =====================================================
-    // ONLY SHOW COLUMNS THAT EXIST
-    // =====================================================
 
     const activeColumns =
         definitions.filter(
@@ -1625,10 +1547,6 @@ function renderEducationTable(
     }
 
 
-    // =====================================================
-    // TABLE WRAPPER
-    // =====================================================
-
     const wrapper =
         document.createElement(
             "div"
@@ -1648,10 +1566,6 @@ function renderEducationTable(
     table.className =
         "marks-table";
 
-
-    // =====================================================
-    // HEADER
-    // =====================================================
 
     const thead =
         document.createElement(
@@ -1694,10 +1608,6 @@ function renderEducationTable(
         thead
     );
 
-
-    // =====================================================
-    // BODY
-    // =====================================================
 
     const tbody =
         document.createElement(
@@ -1790,45 +1700,12 @@ function renderEducationTable(
 
 
 // =========================================================
-// EDUCATION TABLE TITLE
-// =========================================================
-
-function getEducationTableTitle(
-    key
-) {
-
-    const normalized =
-        normalizeKey(
-            key
-        );
-
-
-    if (
-        normalized === "subjects"
-    ) {
-
-        return "Subjects & Marks";
-    }
-
-
-    return formatFieldName(
-        key
-    );
-}
-
-
-// =========================================================
-// NORMALIZE EDUCATION ROWS
+// NORMALIZE EDUCATION DATA
 // =========================================================
 
 function normalizeEducationRows(
     value
 ) {
-
-    // =====================================================
-    // ARRAY FORMAT
-    // CBSE / CISCE / OTHER BOARDS
-    // =====================================================
 
     if (
         Array.isArray(
@@ -1884,11 +1761,6 @@ function normalizeEducationRows(
     }
 
 
-    // =====================================================
-    // OBJECT FORMAT
-    // AP / TELANGANA / OTHER STATE BOARDS
-    // =====================================================
-
     if (
         value &&
         typeof value ===
@@ -1942,17 +1814,13 @@ function normalizeEducationRows(
 
 
 // =========================================================
-// FIND VALUE USING ALIASES
+// ALIAS VALUE
 // =========================================================
 
 function getAliasValue(
     object,
     aliases
 ) {
-
-    // =====================================================
-    // EXACT MATCH
-    // =====================================================
 
     for (
         const alias of aliases
@@ -1970,10 +1838,6 @@ function getAliasValue(
         }
     }
 
-
-    // =====================================================
-    // NORMALIZED MATCH
-    // =====================================================
 
     const normalizedAliases =
         aliases.map(
@@ -2109,7 +1973,7 @@ function displayNormalField(
 
 
 // =========================================================
-// FORMAT OBJECT VALUE
+// OBJECT FORMAT
 // =========================================================
 
 function formatObjectValue(
@@ -2187,24 +2051,6 @@ function formatObjectValue(
                 ]
             ) {
 
-                if (
-                    val &&
-                    typeof val ===
-                        "object"
-                ) {
-
-                    return (
-                        formatFieldName(
-                            key
-                        ) +
-                        ": " +
-                        JSON.stringify(
-                            val
-                        )
-                    );
-                }
-
-
                 return (
                     formatFieldName(
                         key
@@ -2224,7 +2070,233 @@ function formatObjectValue(
 
 
 // =========================================================
-// VALUE CHECK
+// EXECUTION DETAILS
+// =========================================================
+
+function displayExecutionDetails(
+    execution
+) {
+
+    const container =
+        document.createElement(
+            "div"
+        );
+
+
+    container.className =
+        "execution-details-container";
+
+
+    const title =
+        document.createElement(
+            "div"
+        );
+
+
+    title.className =
+        "execution-details-title";
+
+
+    title.textContent =
+        "Execution Details";
+
+
+    container.appendChild(
+        title
+    );
+
+
+    const details = [
+
+        [
+            "Model",
+            execution.modelId ||
+            "Unknown"
+        ],
+
+        [
+            "Input Tokens",
+            formatNumber(
+                execution.inputTokens
+            )
+        ],
+
+        [
+            "Output Tokens",
+            formatNumber(
+                execution.outputTokens
+            )
+        ],
+
+        [
+            "Total Tokens",
+            formatNumber(
+                execution.totalTokens
+            )
+        ],
+
+        [
+            "Model Processing Time",
+            formatDuration(
+                execution.modelLatencyMs
+            )
+        ],
+
+        [
+            "Total Execution Time",
+            formatDuration(
+                execution.totalExecutionMs
+            )
+        ]
+    ];
+
+
+    details.forEach(
+        function (
+            [
+                labelText,
+                valueText
+            ]
+        ) {
+
+            const row =
+                document.createElement(
+                    "div"
+                );
+
+
+            row.className =
+                "execution-detail-row";
+
+
+            const label =
+                document.createElement(
+                    "div"
+                );
+
+
+            label.className =
+                "execution-detail-label";
+
+
+            label.textContent =
+                labelText;
+
+
+            const value =
+                document.createElement(
+                    "div"
+                );
+
+
+            value.className =
+                "execution-detail-value";
+
+
+            value.textContent =
+                valueText;
+
+
+            row.appendChild(
+                label
+            );
+
+
+            row.appendChild(
+                value
+            );
+
+
+            container.appendChild(
+                row
+            );
+        }
+    );
+
+
+    extractedFields.appendChild(
+        container
+    );
+}
+
+
+// =========================================================
+// NUMBER FORMAT
+// =========================================================
+
+function formatNumber(
+    value
+) {
+
+    const number =
+        Number(
+            value
+        );
+
+
+    if (
+        !Number.isFinite(
+            number
+        )
+    ) {
+
+        return "0";
+    }
+
+
+    return number.toLocaleString();
+}
+
+
+// =========================================================
+// TIME FORMAT
+// =========================================================
+
+function formatDuration(
+    milliseconds
+) {
+
+    const ms =
+        Number(
+            milliseconds
+        );
+
+
+    if (
+        !Number.isFinite(
+            ms
+        )
+    ) {
+
+        return "Not available";
+    }
+
+
+    if (
+        ms < 1000
+    ) {
+
+        return (
+            Math.round(
+                ms
+            ) +
+            " ms"
+        );
+    }
+
+
+    return (
+        (
+            ms /
+            1000
+        ).toFixed(2) +
+        " seconds"
+    );
+}
+
+
+// =========================================================
+// HELPERS
 // =========================================================
 
 function hasValue(
@@ -2233,21 +2305,14 @@ function hasValue(
 
     return (
 
-        value !==
-            undefined &&
+        value !== undefined &&
 
-        value !==
-            null &&
+        value !== null &&
 
-        value !==
-            ""
+        value !== ""
     );
 }
 
-
-// =========================================================
-// TABLE VALUE
-// =========================================================
 
 function formatTableValue(
     value
@@ -2292,10 +2357,6 @@ function formatTableValue(
 }
 
 
-// =========================================================
-// NORMALIZE KEY
-// =========================================================
-
 function normalizeKey(
     value
 ) {
@@ -2312,10 +2373,6 @@ function normalizeKey(
         );
 }
 
-
-// =========================================================
-// FORMAT FIELD NAME
-// =========================================================
 
 function formatFieldName(
     name
@@ -2364,9 +2421,19 @@ downloadBtn.addEventListener(
         }
 
 
+        const downloadData = {
+
+            result:
+                latestResult,
+
+            execution:
+                latestExecution
+        };
+
+
         const json =
             JSON.stringify(
-                latestResult,
+                downloadData,
                 null,
                 2
             );
@@ -2374,9 +2441,7 @@ downloadBtn.addEventListener(
 
         const blob =
             new Blob(
-                [
-                    json
-                ],
+                [json],
                 {
                     type:
                         "application/json"
