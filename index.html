@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Document AI Scanner</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<main class="container">
+
+    <header class="header">
+
+        <div class="badge">
+            AMAZON BEDROCK · DOCUMENT AI
+        </div>
+
+        <h1>Document AI Scanner</h1>
+
+        <p>
+            Upload a document to identify its type and
+            extract structured information using Amazon Bedrock.
+        </p>
+
+    </header>
+
+
+    <section class="scanner-card">
+
+        <div class="upload-area" id="dropArea">
+
+            <div class="upload-icon">📄</div>
+
+            <h2>Upload Document</h2>
+
+            <p>
+                Drag and drop your document here
+                or choose a file from your device.
+            </p>
+
+            <input
+                type="file"
+                id="fileInput"
+                accept=".pdf,.doc,.docx,.ppt,.pptx,.xlsx,.txt,.jpg,.jpeg,.png"
+                hidden
+            >
+
+            <button
+                type="button"
+                id="chooseFileBtn"
+                class="choose-btn"
+            >
+                Choose Document
+            </button>
+
+            <div class="supported-files">
+
+                <strong>Supported formats</strong>
+
+                <p>
+                    PDF · DOC · DOCX · PPT · PPTX · XLSX ·
+                    TXT · JPG · JPEG · PNG
+                </p>
+
+                <small>
+                    Maximum file size: 10 MB
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div
+            id="selectedFile"
+            class="selected-file hidden"
+        >
+
+            <div class="selected-file-info">
+
+                <div class="selected-icon">
+                    📎
+                </div>
+
+                <div>
+
+                    <strong id="fileName">
+                        document.pdf
+                    </strong>
+
+                    <span id="fileSize">
+                        0 MB
+                    </span>
+
+                </div>
+
+            </div>
+
+            <button
+                id="removeFileBtn"
+                class="remove-btn"
+                type="button"
+            >
+                ✕
+            </button>
+
+        </div>
+
+
+        <button
+            id="scanBtn"
+            class="scan-btn"
+            type="button"
+            disabled
+        >
+            Scan Document
+        </button>
+
+
+        <div
+            id="processingSection"
+            class="processing hidden"
+        >
+
+            <div class="spinner"></div>
+
+            <h3>
+                Analyzing Document
+            </h3>
+
+            <p id="processingText">
+                Preparing document...
+            </p>
+
+            <div class="progress-container">
+
+                <div
+                    id="progressBar"
+                    class="progress-bar"
+                ></div>
+
+            </div>
+
+        </div>
+
+
+        <div
+            id="errorMessage"
+            class="error-message hidden"
+        ></div>
+
+    </section>
+
+
+    <section
+        id="resultsSection"
+        class="results-section hidden"
+    >
+
+        <div class="results-header">
+
+            <div>
+
+                <span class="results-label">
+                    ANALYSIS COMPLETE
+                </span>
+
+                <h2>
+                    Document Results
+                </h2>
+
+            </div>
+
+            <button
+                id="downloadBtn"
+                class="download-btn"
+                type="button"
+            >
+                Download JSON
+            </button>
+
+        </div>
+
+
+        <div class="classification-grid">
+
+            <div class="classification-card">
+
+                <span>
+                    Category
+                </span>
+
+                <strong id="categoryResult">
+                    —
+                </strong>
+
+            </div>
+
+
+            <div class="classification-card">
+
+                <span>
+                    Document Type
+                </span>
+
+                <strong id="documentTypeResult">
+                    —
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="information-section">
+
+            <h3>
+                Extracted Information
+            </h3>
+
+            <div
+                id="extractedFields"
+                class="extracted-fields"
+            ></div>
+
+        </div>
+
+
+        <div class="information-section">
+
+            <h3>
+                Additional Information
+            </h3>
+
+            <p
+                id="additionalNotes"
+                class="additional-notes"
+            >
+                No additional information.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <footer class="footer">
+
+        <p>
+            Powered by Amazon Bedrock
+        </p>
+
+        <span>
+            Documents are processed for analysis and
+            are not permanently stored.
+        </span>
+
+    </footer>
+
+</main>
+
+
+<script src="script.js"></script>
+
+</body>
+
+</html>
