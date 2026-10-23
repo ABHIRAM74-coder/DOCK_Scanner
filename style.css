@@ -961,25 +961,94 @@ button {
     background: rgba(255, 255, 255, 0.035);
 }
 
+/* =========================================================
+   UNIVERSAL EDUCATION MARKSHEET TABLE
+   ========================================================= */
+
+.marksheet-table-container {
+    width: 100%;
+    margin-top: 18px;
+    margin-bottom: 28px;
+}
+
+.marksheet-table-title {
+    margin-bottom: 12px;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.marks-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.marks-table {
+    width: 100%;
+    min-width: 750px;
+    border-collapse: collapse;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.marks-table thead {
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.marks-table th {
+    padding: 14px 15px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.marks-table td {
+    padding: 14px 15px;
+    text-align: center;
+    font-size: 14px;
+    white-space: nowrap;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.marks-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.marks-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.035);
+}
+
+/* Subject name should have more room */
+
+.marks-table th:nth-child(2),
+.marks-table td:nth-child(2) {
+    min-width: 200px;
+    text-align: left;
+}
+
 
 /* =========================================================
-   MOBILE MARKSHEET TABLE
+   MOBILE
    ========================================================= */
 
 @media (max-width: 700px) {
 
     .marks-table {
-        min-width: 650px;
+        min-width: 680px;
     }
 
     .marks-table th,
     .marks-table td {
-        padding: 11px 12px;
+        padding: 11px 10px;
         font-size: 12px;
     }
 
     .marks-table th:nth-child(2),
     .marks-table td:nth-child(2) {
-        min-width: 170px;
+        min-width: 160px;
     }
 }

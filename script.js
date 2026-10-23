@@ -1,22 +1,12 @@
 "use strict";
 
 /* =========================================================
-   DOCUMENT AI SCANNER
+   FAMILY DOCUMENT SCANNER
    Frontend → API Gateway → Lambda → Amazon Bedrock
    ========================================================= */
 
-
-// =========================================================
-// API CONFIGURATION
-// =========================================================
-
 const API_URL =
     "https://bcuo2i0zhb.execute-api.ap-southeast-2.amazonaws.com/scan";
-
-
-// =========================================================
-// FILE SETTINGS
-// =========================================================
 
 const ALLOWED_EXTENSIONS = new Set([
     "pdf",
@@ -31,103 +21,55 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 
 // =========================================================
-// HTML ELEMENTS
+// ELEMENTS
 // =========================================================
 
-const fileInput =
-    document.getElementById("fileInput");
-
-const chooseFileBtn =
-    document.getElementById("chooseFileBtn");
-
-const dropArea =
-    document.getElementById("dropArea");
-
-const selectedFile =
-    document.getElementById("selectedFile");
-
-const fileName =
-    document.getElementById("fileName");
-
-const fileSize =
-    document.getElementById("fileSize");
-
-const removeFileBtn =
-    document.getElementById("removeFileBtn");
-
-const scanBtn =
-    document.getElementById("scanBtn");
-
-const errorMessage =
-    document.getElementById("errorMessage");
-
-const processingSection =
-    document.getElementById("processingSection");
-
-const processingText =
-    document.getElementById("processingText");
-
-const progressBar =
-    document.getElementById("progressBar");
-
-const resultsSection =
-    document.getElementById("resultsSection");
-
-const categoryResult =
-    document.getElementById("categoryResult");
-
-const documentTypeResult =
-    document.getElementById("documentTypeResult");
-
-const extractedFields =
-    document.getElementById("extractedFields");
-
-const additionalNotes =
-    document.getElementById("additionalNotes");
-
-const downloadBtn =
-    document.getElementById("downloadBtn");
-
-
-// =========================================================
-// STATE
-// =========================================================
+const fileInput = document.getElementById("fileInput");
+const chooseFileBtn = document.getElementById("chooseFileBtn");
+const dropArea = document.getElementById("dropArea");
+const selectedFile = document.getElementById("selectedFile");
+const fileName = document.getElementById("fileName");
+const fileSize = document.getElementById("fileSize");
+const removeFileBtn = document.getElementById("removeFileBtn");
+const scanBtn = document.getElementById("scanBtn");
+const errorMessage = document.getElementById("errorMessage");
+const processingSection = document.getElementById("processingSection");
+const processingText = document.getElementById("processingText");
+const progressBar = document.getElementById("progressBar");
+const resultsSection = document.getElementById("resultsSection");
+const categoryResult = document.getElementById("categoryResult");
+const documentTypeResult = document.getElementById("documentTypeResult");
+const extractedFields = document.getElementById("extractedFields");
+const additionalNotes = document.getElementById("additionalNotes");
+const downloadBtn = document.getElementById("downloadBtn");
 
 let currentFile = null;
 let latestResult = null;
 
 
 // =========================================================
-// CHOOSE FILE
+// FILE PICKER
 // =========================================================
 
-chooseFileBtn.addEventListener("click", function () {
+chooseFileBtn.addEventListener("click", () => {
     fileInput.click();
 });
 
+fileInput.addEventListener("change", () => {
 
-// =========================================================
-// FILE INPUT
-// =========================================================
-
-fileInput.addEventListener("change", function () {
-
-    if (
-        fileInput.files &&
-        fileInput.files.length > 0
-    ) {
+    if (fileInput.files?.length) {
         handleFile(fileInput.files[0]);
     }
 });
 
 
 // =========================================================
-// DRAG AND DROP
+// DRAG & DROP
 // =========================================================
 
-["dragenter", "dragover"].forEach(function (eventName) {
+["dragenter", "dragover"].forEach(eventName => {
 
-    dropArea.addEventListener(eventName, function (event) {
+    dropArea.addEventListener(eventName, event => {
 
         event.preventDefault();
         event.stopPropagation();
@@ -136,10 +78,9 @@ fileInput.addEventListener("change", function () {
     });
 });
 
+["dragleave", "drop"].forEach(eventName => {
 
-["dragleave", "drop"].forEach(function (eventName) {
-
-    dropArea.addEventListener(eventName, function (event) {
+    dropArea.addEventListener(eventName, event => {
 
         event.preventDefault();
         event.stopPropagation();
@@ -148,22 +89,18 @@ fileInput.addEventListener("change", function () {
     });
 });
 
-
-dropArea.addEventListener("drop", function (event) {
+dropArea.addEventListener("drop", event => {
 
     const files = event.dataTransfer.files;
 
-    if (
-        files &&
-        files.length > 0
-    ) {
+    if (files?.length) {
         handleFile(files[0]);
     }
 });
 
 
 // =========================================================
-// HANDLE SELECTED FILE
+// VALIDATE FILE
 // =========================================================
 
 function handleFile(file) {
@@ -171,31 +108,25 @@ function handleFile(file) {
     clearError();
     hideResults();
 
-    const extension =
-        getFileExtension(file.name);
-
+    const extension = getFileExtension(file.name);
 
     if (!ALLOWED_EXTENSIONS.has(extension)) {
 
         showError(
-            "Unsupported file type. Currently supported: PDF, DOCX, TXT, JPG, JPEG and PNG."
+            "Unsupported file type. Supported formats: PDF, DOCX, TXT, JPG, JPEG and PNG."
         );
 
         resetFile();
         return;
     }
-
 
     if (file.size === 0) {
 
-        showError(
-            "The selected file is empty."
-        );
+        showError("The selected file is empty.");
 
         resetFile();
         return;
     }
-
 
     if (file.size > MAX_FILE_SIZE) {
 
@@ -207,14 +138,10 @@ function handleFile(file) {
         return;
     }
 
-
     currentFile = file;
 
-    fileName.textContent =
-        file.name;
-
-    fileSize.textContent =
-        formatFileSize(file.size);
+    fileName.textContent = file.name;
+    fileSize.textContent = formatFileSize(file.size);
 
     selectedFile.classList.remove("hidden");
 
@@ -222,67 +149,41 @@ function handleFile(file) {
 }
 
 
-// =========================================================
-// FILE EXTENSION
-// =========================================================
-
 function getFileExtension(name) {
 
-    const pieces =
-        name.toLowerCase().split(".");
+    const pieces = name.toLowerCase().split(".");
 
-    if (pieces.length < 2) {
-        return "";
-    }
-
-    return pieces.pop();
+    return pieces.length > 1
+        ? pieces.pop()
+        : "";
 }
 
-
-// =========================================================
-// FORMAT FILE SIZE
-// =========================================================
 
 function formatFileSize(bytes) {
 
     if (bytes < 1024) {
-        return bytes + " bytes";
+        return `${bytes} bytes`;
     }
 
     if (bytes < 1024 * 1024) {
-
-        return (
-            (bytes / 1024).toFixed(2) +
-            " KB"
-        );
+        return `${(bytes / 1024).toFixed(2)} KB`;
     }
 
-    return (
-        (
-            bytes /
-            1024 /
-            1024
-        ).toFixed(2) +
-        " MB"
-    );
+    return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
 }
 
 
 // =========================================================
-// REMOVE FILE
+// RESET
 // =========================================================
 
-removeFileBtn.addEventListener("click", function () {
+removeFileBtn.addEventListener("click", () => {
 
     resetFile();
     clearError();
     hideResults();
 });
 
-
-// =========================================================
-// RESET FILE
-// =========================================================
 
 function resetFile() {
 
@@ -305,7 +206,7 @@ function resetFile() {
 
 
 // =========================================================
-// ERROR
+// ERRORS
 // =========================================================
 
 function showError(message) {
@@ -324,10 +225,6 @@ function clearError() {
 }
 
 
-// =========================================================
-// HIDE RESULTS
-// =========================================================
-
 function hideResults() {
 
     resultsSection.classList.add("hidden");
@@ -335,28 +232,22 @@ function hideResults() {
 
 
 // =========================================================
-// FILE → BASE64
+// BASE64
 // =========================================================
 
 function fileToBase64(file) {
 
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, reject) => {
 
-        const reader =
-            new FileReader();
+        const reader = new FileReader();
 
-
-        reader.onload = function () {
+        reader.onload = () => {
 
             try {
 
-                const result =
-                    reader.result;
+                const result = reader.result;
 
-                const base64 =
-                    result.split(",")[1];
-
-                resolve(base64);
+                resolve(result.split(",")[1]);
 
             } catch (error) {
 
@@ -364,8 +255,7 @@ function fileToBase64(file) {
             }
         };
 
-
-        reader.onerror = function () {
+        reader.onerror = () => {
 
             reject(
                 new Error(
@@ -374,17 +264,16 @@ function fileToBase64(file) {
             );
         };
 
-
         reader.readAsDataURL(file);
     });
 }
 
 
 // =========================================================
-// SCAN DOCUMENT
+// SCAN
 // =========================================================
 
-scanBtn.addEventListener("click", async function () {
+scanBtn.addEventListener("click", async () => {
 
     if (!currentFile) {
 
@@ -395,76 +284,57 @@ scanBtn.addEventListener("click", async function () {
         return;
     }
 
-
     clearError();
     hideResults();
     startProcessing();
-
 
     try {
 
         processingText.textContent =
             "Preparing document...";
 
-
         const base64Data =
             await fileToBase64(currentFile);
 
-
-        progressBar.style.width =
-            "35%";
-
+        progressBar.style.width = "35%";
 
         processingText.textContent =
             "Sending document securely...";
 
+        const apiResponse = await fetch(
+            API_URL,
+            {
+                method: "POST",
 
-        const apiResponse =
-            await fetch(
-                API_URL,
-                {
-                    method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
 
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
+                body: JSON.stringify({
+                    fileName: currentFile.name,
+                    fileData: base64Data
+                })
+            }
+        );
 
-                    body:
-                        JSON.stringify({
-                            fileName:
-                                currentFile.name,
-
-                            fileData:
-                                base64Data
-                        })
-                }
-            );
-
-
-        progressBar.style.width =
-            "70%";
-
+        progressBar.style.width = "70%";
 
         processingText.textContent =
             "Amazon Bedrock is analyzing the document...";
 
-
         let responseData;
-
 
         try {
 
             responseData =
                 await apiResponse.json();
 
-        } catch (error) {
+        } catch {
 
             throw new Error(
                 "The server returned an invalid response."
             );
         }
-
 
         if (!apiResponse.ok) {
 
@@ -474,25 +344,22 @@ scanBtn.addEventListener("click", async function () {
             );
         }
 
+        /*
+            Lambda proxy responses can contain
+            the real response inside body.
+        */
 
-        // Lambda proxy response
-        if (
-            typeof responseData.body ===
-            "string"
-        ) {
+        if (typeof responseData.body === "string") {
 
             try {
 
                 responseData =
-                    JSON.parse(
-                        responseData.body
-                    );
+                    JSON.parse(responseData.body);
 
-            } catch (error) {
-                // Keep original response
+            } catch {
+                // keep response unchanged
             }
         }
-
 
         if (!responseData.success) {
 
@@ -502,7 +369,6 @@ scanBtn.addEventListener("click", async function () {
             );
         }
 
-
         if (!responseData.result) {
 
             throw new Error(
@@ -510,42 +376,24 @@ scanBtn.addEventListener("click", async function () {
             );
         }
 
-
-        progressBar.style.width =
-            "100%";
-
+        progressBar.style.width = "100%";
 
         processingText.textContent =
             "Analysis complete";
 
-
-        displayResults(
-            responseData.result
-        );
-
+        displayResults(responseData.result);
 
         stopProcessing();
 
     } catch (error) {
 
-        console.error(
-            "Document scan error:",
-            error
-        );
+        console.error(error);
 
+        processingSection.classList.add("hidden");
 
-        processingSection.classList.add(
-            "hidden"
-        );
+        progressBar.style.width = "0%";
 
-
-        progressBar.style.width =
-            "0%";
-
-
-        scanBtn.disabled =
-            !currentFile;
-
+        scanBtn.disabled = !currentFile;
 
         showError(
             error.message ||
@@ -561,14 +409,11 @@ scanBtn.addEventListener("click", async function () {
 
 function startProcessing() {
 
-    processingSection.classList.remove(
-        "hidden"
-    );
+    processingSection.classList.remove("hidden");
 
     scanBtn.disabled = true;
 
-    progressBar.style.width =
-        "15%";
+    progressBar.style.width = "15%";
 
     processingText.textContent =
         "Preparing document...";
@@ -577,163 +422,78 @@ function startProcessing() {
 
 function stopProcessing() {
 
-    progressBar.style.width =
-        "100%";
+    progressBar.style.width = "100%";
 
     processingText.textContent =
         "Analysis complete";
 
+    setTimeout(() => {
 
-    setTimeout(function () {
+        processingSection.classList.add("hidden");
 
-        processingSection.classList.add(
-            "hidden"
-        );
-
-        progressBar.style.width =
-            "0%";
+        progressBar.style.width = "0%";
 
     }, 700);
 
-
-    scanBtn.disabled =
-        !currentFile;
+    scanBtn.disabled = !currentFile;
 }
 
 
 // =========================================================
-// DISPLAY RESULTS
+// RESULTS
 // =========================================================
 
 function displayResults(result) {
 
     latestResult = result;
 
-
     categoryResult.textContent =
-        result.category ||
-        "Unknown";
-
+        result.category || "Unknown";
 
     documentTypeResult.textContent =
-        result.documentType ||
-        "Unknown";
+        result.documentType || "Unknown";
 
-
-    // =====================================================
-    // NOTES
-    // =====================================================
-
-    if (Array.isArray(result.notes)) {
-
-        additionalNotes.textContent =
-            result.notes.length > 0
-                ? result.notes.join("\n")
-                : "No additional information.";
-
-    } else {
-
-        additionalNotes.textContent =
-            result.notes ||
-            "No additional information.";
-    }
-
-
-    // =====================================================
-    // CLEAR PREVIOUS FIELDS
-    // =====================================================
+    displayNotes(result.notes);
 
     extractedFields.innerHTML = "";
 
+    const fields = result.fields || {};
 
-    const fields =
-        result.fields || {};
+    const entries = Object.entries(fields);
 
+    if (!entries.length) {
 
-    const entries =
-        Object.entries(fields);
-
-
-    if (entries.length === 0) {
-
-        const emptyMessage =
+        const message =
             document.createElement("p");
 
-        emptyMessage.textContent =
-            "No information could be extracted.";
-
-        emptyMessage.className =
+        message.className =
             "additional-notes";
 
-        extractedFields.appendChild(
-            emptyMessage
-        );
+        message.textContent =
+            "No information could be extracted.";
+
+        extractedFields.appendChild(message);
     }
 
-
-    // =====================================================
-    // DISPLAY FIELDS
-    // =====================================================
-
-    entries.forEach(function ([key, value]) {
+    entries.forEach(([key, value]) => {
 
         /*
-           ==================================================
-           UNIVERSAL EDUCATION SUBJECT DETECTION
-
-           Handles:
-           CBSE
-           CISCE / ICSE / ISC
-           AP SSC
-           Telangana SSC
-           State Boards
-           10th marksheets
-           12th marksheets
-
-           It accepts both:
-
-           subjects: {...}
-
-           AND
-
-           subjects: [...]
-           ==================================================
+            Detect an education subject collection
+            based on structure, NOT merely one
+            hard-coded field name.
         */
 
-        if (
-            isSubjectField(key) &&
-            value &&
-            typeof value === "object"
-        ) {
+        if (isEducationSubjectCollection(key, value)) {
 
-            displaySubjectsTable(
-                key,
-                value
-            );
+            renderEducationTable(key, value);
 
             return;
         }
 
-
-        // =================================================
-        // NORMAL FIELD
-        // =================================================
-
-        displayNormalField(
-            key,
-            value
-        );
+        displayNormalField(key, value);
     });
 
-
-    // =====================================================
-    // SHOW RESULTS
-    // =====================================================
-
-    resultsSection.classList.remove(
-        "hidden"
-    );
-
+    resultsSection.classList.remove("hidden");
 
     resultsSection.scrollIntoView({
         behavior: "smooth",
@@ -743,47 +503,587 @@ function displayResults(result) {
 
 
 // =========================================================
-// DETECT SUBJECT FIELD
+// NOTES
 // =========================================================
 
-function isSubjectField(key) {
+function displayNotes(notes) {
 
-    const normalized =
-        String(key)
-            .toLowerCase()
-            .replace(/[\s_-]/g, "");
+    if (Array.isArray(notes)) {
 
+        additionalNotes.textContent =
+            notes.length
+                ? notes.join("\n")
+                : "No additional information.";
 
-    const possibleNames = [
-        "subjects",
-        "subjectdetails",
-        "subjectmarks",
-        "marks",
-        "markdetails",
-        "marksdetails",
-        "subjectwise",
-        "subjectwiseresults"
-    ];
+        return;
+    }
 
-
-    return possibleNames.includes(
-        normalized
-    );
+    additionalNotes.textContent =
+        notes ||
+        "No additional information.";
 }
 
 
 // =========================================================
-// NORMAL FIELD
+// EDUCATION TABLE DETECTION
 // =========================================================
 
-function displayNormalField(
-    key,
-    value
-) {
+function isEducationSubjectCollection(key, value) {
+
+    if (
+        !value ||
+        typeof value !== "object"
+    ) {
+        return false;
+    }
+
+    const normalizedKey =
+        normalizeKey(key);
+
+    const knownSubjectKeys = new Set([
+        "subjects",
+        "subject",
+        "subjectsandmarks",
+        "subjectandmarks",
+        "subjectdetails",
+        "subjectsdetails",
+        "subjectmarks",
+        "subjectsmarks",
+        "subjectwisemarks",
+        "subjectwisedetails",
+        "subjectwiseresults",
+        "markdetails",
+        "marksdetails",
+        "marksobtained",
+        "academicmarks",
+        "academicdetails"
+    ]);
+
+    if (knownSubjectKeys.has(normalizedKey)) {
+        return true;
+    }
+
+    /*
+        Structural detection.
+
+        Even if Nova invents another key name,
+        examine the contents and determine whether
+        it looks like a collection of subjects.
+    */
+
+    const rows = normalizeEducationRows(value);
+
+    if (!rows.length) {
+        return false;
+    }
+
+    const subjectIndicators = [
+        "subjectname",
+        "subject",
+        "subjectcode",
+        "papername",
+        "papercode",
+        "marks",
+        "markssecured",
+        "marksobtained",
+        "theorymarks",
+        "practicalmarks",
+        "internalmarks",
+        "externalmarks",
+        "totalmarks",
+        "grade"
+    ];
+
+    return rows.some(row => {
+
+        const rowKeys =
+            Object.keys(row)
+                .map(normalizeKey);
+
+        return subjectIndicators.some(
+            indicator =>
+                rowKeys.includes(indicator)
+        );
+    });
+}
+
+
+// =========================================================
+// UNIVERSAL EDUCATION TABLE
+// =========================================================
+
+function renderEducationTable(key, value) {
+
+    const rows =
+        normalizeEducationRows(value);
+
+    if (!rows.length) {
+
+        displayNormalField(key, value);
+
+        return;
+    }
+
+    const container =
+        document.createElement("div");
+
+    container.className =
+        "marksheet-table-container";
+
+    const title =
+        document.createElement("div");
+
+    title.className =
+        "marksheet-table-title";
+
+    title.textContent =
+        formatFieldName(key);
+
+    container.appendChild(title);
+
+
+    /*
+        -----------------------------------------------------
+        UNIVERSAL EDUCATION COLUMN MODEL
+
+        A board does NOT need to contain every field.
+
+        Only columns actually found in the document
+        will be displayed.
+        -----------------------------------------------------
+    */
+
+    const definitions = [
+
+        {
+            label: "Code",
+
+            aliases: [
+                "subjectCode",
+                "subject_code",
+                "paperCode",
+                "paper_code",
+                "code"
+            ]
+        },
+
+        {
+            label: "Subject",
+
+            aliases: [
+                "subjectName",
+                "subject_name",
+                "paperName",
+                "paper_name",
+                "subject",
+                "name",
+                "_subjectKey"
+            ]
+        },
+
+        {
+            label: "Theory",
+
+            aliases: [
+                "theoryMarks",
+                "theory_marks",
+                "theoryObtained",
+                "theory_obtained",
+                "theory",
+                "writtenMarks",
+                "written_marks"
+            ]
+        },
+
+        {
+            label: "Practical",
+
+            aliases: [
+                "practicalMarks",
+                "practical_marks",
+                "practicalObtained",
+                "practical_obtained",
+                "practical",
+                "labMarks",
+                "lab_marks"
+            ]
+        },
+
+        {
+            label: "Internal",
+
+            aliases: [
+                "internalAssessmentMarks",
+                "internal_assessment_marks",
+                "internalMarks",
+                "internal_marks",
+                "internalObtained",
+                "internal_obtained",
+                "internalAssessment",
+                "internal"
+            ]
+        },
+
+        {
+            label: "External",
+
+            aliases: [
+                "externalMarks",
+                "external_marks",
+                "externalObtained",
+                "external_obtained",
+                "external"
+            ]
+        },
+
+        {
+            label: "Maximum Marks",
+
+            aliases: [
+                "maximumMarks",
+                "maximum_marks",
+                "maxMarks",
+                "max_marks",
+                "maximum",
+                "totalMaximumMarks"
+            ]
+        },
+
+        {
+            label: "Marks Obtained",
+
+            aliases: [
+                "marksSecured",
+                "marks_secured",
+                "marksObtained",
+                "marks_obtained",
+                "obtainedMarks",
+                "obtained_marks",
+                "score",
+                "marks"
+            ]
+        },
+
+        {
+            label: "Total",
+
+            aliases: [
+                "totalMarks",
+                "total_marks",
+                "subjectTotal",
+                "subject_total",
+                "total"
+            ]
+        },
+
+        {
+            label: "Marks In Words",
+
+            aliases: [
+                "marksInWords",
+                "marks_in_words",
+                "totalInWords",
+                "total_in_words",
+                "obtainedMarksInWords"
+            ]
+        },
+
+        {
+            label: "Grade",
+
+            aliases: [
+                "grade",
+                "gradePoint",
+                "grade_point",
+                "letterGrade",
+                "letter_grade"
+            ]
+        },
+
+        {
+            label: "Result",
+
+            aliases: [
+                "result",
+                "status",
+                "passFail",
+                "pass_fail"
+            ]
+        }
+    ];
+
+
+    /*
+        Determine which columns are actually present.
+    */
+
+    const activeColumns =
+        definitions.filter(definition =>
+
+            rows.some(row =>
+
+                getAliasValue(
+                    row,
+                    definition.aliases
+                ) !== null
+            )
+        );
+
+
+    if (!activeColumns.length) {
+
+        displayNormalField(key, value);
+
+        return;
+    }
+
+
+    const wrapper =
+        document.createElement("div");
+
+    wrapper.className =
+        "marks-table-wrapper";
+
+
+    const table =
+        document.createElement("table");
+
+    table.className =
+        "marks-table";
+
+
+    // =====================================================
+    // TABLE HEADER
+    // =====================================================
+
+    const thead =
+        document.createElement("thead");
+
+    const headerRow =
+        document.createElement("tr");
+
+    activeColumns.forEach(column => {
+
+        const th =
+            document.createElement("th");
+
+        th.textContent =
+            column.label;
+
+        headerRow.appendChild(th);
+    });
+
+    thead.appendChild(headerRow);
+
+    table.appendChild(thead);
+
+
+    // =====================================================
+    // TABLE BODY
+    // =====================================================
+
+    const tbody =
+        document.createElement("tbody");
+
+    rows.forEach(rowData => {
+
+        const tr =
+            document.createElement("tr");
+
+        activeColumns.forEach(column => {
+
+            const td =
+                document.createElement("td");
+
+            let fieldValue =
+                getAliasValue(
+                    rowData,
+                    column.aliases
+                );
+
+            if (
+                column.label === "Subject" &&
+                fieldValue === rowData._subjectKey
+            ) {
+
+                fieldValue =
+                    formatFieldName(fieldValue);
+            }
+
+            td.textContent =
+                fieldValue === null
+                    ? "—"
+                    : formatTableValue(fieldValue);
+
+            tr.appendChild(td);
+        });
+
+        tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+
+    wrapper.appendChild(table);
+
+    container.appendChild(wrapper);
+
+    extractedFields.appendChild(container);
+}
+
+
+// =========================================================
+// NORMALIZE EDUCATION ROWS
+// =========================================================
+
+function normalizeEducationRows(value) {
+
+    /*
+        CBSE / many board responses:
+
+        [
+          {
+             subjectCode: "...",
+             subjectName: "...",
+             theoryMarks: "..."
+          }
+        ]
+    */
+
+    if (Array.isArray(value)) {
+
+        return value
+            .filter(item =>
+                item !== null &&
+                item !== undefined
+            )
+            .map((item, index) => {
+
+                if (
+                    item &&
+                    typeof item === "object" &&
+                    !Array.isArray(item)
+                ) {
+
+                    return item;
+                }
+
+                return {
+                    _subjectKey:
+                        `Subject ${index + 1}`,
+
+                    marksSecured:
+                        item
+                };
+            });
+    }
+
+
+    /*
+        AP / Telangana / other possible structures:
+
+        {
+            mathematics: {
+                marksSecured: "92"
+            },
+
+            firstLanguage: {
+                name: "TELUGU",
+                marksSecured: "90"
+            }
+        }
+    */
+
+    if (
+        value &&
+        typeof value === "object"
+    ) {
+
+        return Object.entries(value)
+            .map(([subjectKey, subjectValue]) => {
+
+                if (
+                    subjectValue &&
+                    typeof subjectValue === "object" &&
+                    !Array.isArray(subjectValue)
+                ) {
+
+                    return {
+                        _subjectKey: subjectKey,
+                        ...subjectValue
+                    };
+                }
+
+                return {
+                    _subjectKey: subjectKey,
+                    marksSecured: subjectValue
+                };
+            });
+    }
+
+    return [];
+}
+
+
+// =========================================================
+// FIELD ALIAS MATCHING
+// =========================================================
+
+function getAliasValue(object, aliases) {
+
+    /*
+        Exact match first.
+    */
+
+    for (const alias of aliases) {
+
+        if (hasValue(object[alias])) {
+            return object[alias];
+        }
+    }
+
+
+    /*
+        Normalized match allows:
+
+        theoryMarks
+        theory_marks
+        Theory Marks
+        THEORY-MARKS
+
+        to be treated as equivalent.
+    */
+
+    const normalizedAliases =
+        aliases.map(normalizeKey);
+
+    for (const [key, value] of Object.entries(object)) {
+
+        if (!hasValue(value)) {
+            continue;
+        }
+
+        if (
+            normalizedAliases.includes(
+                normalizeKey(key)
+            )
+        ) {
+
+            return value;
+        }
+    }
+
+    return null;
+}
+
+
+// =========================================================
+// NORMAL FIELD DISPLAY
+// =========================================================
+
+function displayNormalField(key, value) {
 
     const row =
         document.createElement("div");
-
 
     row.className =
         "extracted-field";
@@ -792,10 +1092,8 @@ function displayNormalField(
     const label =
         document.createElement("div");
 
-
     label.className =
         "field-name";
-
 
     label.textContent =
         formatFieldName(key);
@@ -804,16 +1102,11 @@ function displayNormalField(
     const content =
         document.createElement("div");
 
-
     content.className =
         "field-value";
 
 
-    if (
-        value === null ||
-        value === undefined ||
-        value === ""
-    ) {
+    if (!hasValue(value)) {
 
         content.textContent =
             "Not found";
@@ -841,7 +1134,7 @@ function displayNormalField(
 
 
 // =========================================================
-// FORMAT OTHER OBJECTS
+// FORMAT OBJECT
 // =========================================================
 
 function formatObjectValue(value) {
@@ -849,7 +1142,7 @@ function formatObjectValue(value) {
     if (Array.isArray(value)) {
 
         return value
-            .map(function (item) {
+            .map(item => {
 
                 if (
                     item &&
@@ -857,14 +1150,9 @@ function formatObjectValue(value) {
                 ) {
 
                     return Object.entries(item)
-                        .map(function ([key, val]) {
-
-                            return (
-                                formatFieldName(key) +
-                                ": " +
-                                String(val)
-                            );
-                        })
+                        .map(([key, val]) =>
+                            `${formatFieldName(key)}: ${formatTableValue(val)}`
+                        )
                         .join(", ");
                 }
 
@@ -875,7 +1163,7 @@ function formatObjectValue(value) {
 
 
     return Object.entries(value)
-        .map(function ([key, val]) {
+        .map(([key, val]) => {
 
             if (
                 val &&
@@ -883,17 +1171,14 @@ function formatObjectValue(value) {
             ) {
 
                 return (
-                    formatFieldName(key) +
-                    ": " +
+                    `${formatFieldName(key)}: ` +
                     JSON.stringify(val)
                 );
             }
 
-
             return (
-                formatFieldName(key) +
-                ": " +
-                String(val)
+                `${formatFieldName(key)}: ` +
+                `${formatTableValue(val)}`
             );
         })
         .join("\n");
@@ -901,534 +1186,10 @@ function formatObjectValue(value) {
 
 
 // =========================================================
-// UNIVERSAL MARKSHEET TABLE
+// VALUE HELPERS
 // =========================================================
 
-function displaySubjectsTable(
-    key,
-    subjects
-) {
-
-    const container =
-        document.createElement("div");
-
-
-    container.className =
-        "marksheet-table-container";
-
-
-    // =====================================================
-    // TITLE
-    // =====================================================
-
-    const title =
-        document.createElement("div");
-
-
-    title.className =
-        "marksheet-table-title";
-
-
-    title.textContent =
-        formatFieldName(key);
-
-
-    container.appendChild(title);
-
-
-    // =====================================================
-    // NORMALIZE DATA
-    // =====================================================
-
-    const subjectList =
-        normalizeSubjects(subjects);
-
-
-    if (subjectList.length === 0) {
-
-        const empty =
-            document.createElement("p");
-
-
-        empty.textContent =
-            "No subject information available.";
-
-
-        container.appendChild(empty);
-
-        extractedFields.appendChild(
-            container
-        );
-
-        return;
-    }
-
-
-    // =====================================================
-    // COLUMN DEFINITIONS
-    // =====================================================
-
-    const columnDefinitions = [
-
-        {
-            label: "Code",
-
-            keys: [
-                "subjectCode",
-                "subject_code",
-                "code",
-                "paperCode",
-                "paper_code"
-            ]
-        },
-
-
-        {
-            label: "Subject",
-
-            keys: [
-                "subjectName",
-                "subject_name",
-                "name",
-                "subject",
-                "paperName",
-                "paper_name",
-                "_subjectKey"
-            ]
-        },
-
-
-        {
-            label: "Theory",
-
-            keys: [
-                "theoryMarks",
-                "theory_marks",
-                "theory",
-                "writtenMarks",
-                "written_marks",
-                "written",
-                "externalMarks",
-                "external_marks"
-            ]
-        },
-
-
-        {
-            label: "Practical",
-
-            keys: [
-                "practicalMarks",
-                "practical_marks",
-                "practical",
-                "labMarks",
-                "lab_marks"
-            ]
-        },
-
-
-        {
-            label: "Internal",
-
-            keys: [
-                "internalAssessmentMarks",
-                "internal_assessment_marks",
-                "internalMarks",
-                "internal_marks",
-                "internalAssessment",
-                "internal_assessment",
-                "internal",
-                "sessionalMarks",
-                "sessional_marks"
-            ]
-        },
-
-
-        {
-            label: "Marks Secured",
-
-            keys: [
-                "marksSecured",
-                "marks_secured",
-                "marksObtained",
-                "marks_obtained",
-                "obtainedMarks",
-                "obtained_marks",
-                "score",
-                "marks"
-            ]
-        },
-
-
-        {
-            label: "Maximum Marks",
-
-            keys: [
-                "maximumMarks",
-                "maximum_marks",
-                "maxMarks",
-                "max_marks",
-                "maximum"
-            ]
-        },
-
-
-        {
-            label: "Total",
-
-            keys: [
-                "totalMarks",
-                "total_marks",
-                "total"
-            ]
-        },
-
-
-        {
-            label: "Grade",
-
-            keys: [
-                "grade",
-                "gradePoint",
-                "grade_point",
-                "resultGrade"
-            ]
-        },
-
-
-        {
-            label: "Result",
-
-            keys: [
-                "result",
-                "status",
-                "passFail",
-                "pass_fail"
-            ]
-        }
-    ];
-
-
-    // =====================================================
-    // DETERMINE WHICH COLUMNS EXIST
-    // =====================================================
-
-    const activeColumns =
-        columnDefinitions.filter(
-            function (column) {
-
-                return subjectList.some(
-                    function (subject) {
-
-                        return column.keys.some(
-                            function (fieldKey) {
-
-                                return hasUsableValue(
-                                    subject[fieldKey]
-                                );
-                            }
-                        );
-                    }
-                );
-            }
-        );
-
-
-    // =====================================================
-    // FALLBACK
-    // =====================================================
-
-    if (activeColumns.length === 0) {
-
-        displayNormalField(
-            key,
-            subjects
-        );
-
-        return;
-    }
-
-
-    // =====================================================
-    // TABLE WRAPPER
-    // =====================================================
-
-    const tableWrapper =
-        document.createElement("div");
-
-
-    tableWrapper.className =
-        "marks-table-wrapper";
-
-
-    const table =
-        document.createElement("table");
-
-
-    table.className =
-        "marks-table";
-
-
-    // =====================================================
-    // HEADER
-    // =====================================================
-
-    const thead =
-        document.createElement("thead");
-
-
-    const headerRow =
-        document.createElement("tr");
-
-
-    activeColumns.forEach(
-        function (column) {
-
-            const th =
-                document.createElement("th");
-
-
-            th.textContent =
-                column.label;
-
-
-            headerRow.appendChild(th);
-        }
-    );
-
-
-    thead.appendChild(headerRow);
-
-    table.appendChild(thead);
-
-
-    // =====================================================
-    // TABLE BODY
-    // =====================================================
-
-    const tbody =
-        document.createElement("tbody");
-
-
-    subjectList.forEach(
-        function (subject) {
-
-            const row =
-                document.createElement("tr");
-
-
-            activeColumns.forEach(
-                function (column) {
-
-                    const cell =
-                        document.createElement("td");
-
-
-                    let cellValue =
-                        findFirstValue(
-                            subject,
-                            column.keys
-                        );
-
-
-                    if (
-                        column.label === "Subject" &&
-                        cellValue &&
-                        subject._subjectKey ===
-                            cellValue
-                    ) {
-
-                        cellValue =
-                            formatFieldName(
-                                cellValue
-                            );
-                    }
-
-
-                    cell.textContent =
-                        hasUsableValue(
-                            cellValue
-                        )
-                            ? String(cellValue)
-                            : "—";
-
-
-                    row.appendChild(cell);
-                }
-            );
-
-
-            tbody.appendChild(row);
-        }
-    );
-
-
-    table.appendChild(tbody);
-
-    tableWrapper.appendChild(table);
-
-    container.appendChild(
-        tableWrapper
-    );
-
-
-    extractedFields.appendChild(
-        container
-    );
-}
-
-
-// =========================================================
-// NORMALIZE SUBJECT DATA
-// =========================================================
-
-function normalizeSubjects(subjects) {
-
-    /*
-       -----------------------------------------------------
-       FORMAT 1 — CBSE / ICSE style
-
-       subjects: [
-           {
-               subjectCode: "184",
-               subjectName: "ENGLISH",
-               theoryMarks: "052",
-               internalAssessmentMarks: "019",
-               totalMarks: "071",
-               grade: "C1"
-           }
-       ]
-       -----------------------------------------------------
-    */
-
-    if (Array.isArray(subjects)) {
-
-        return subjects
-            .filter(function (subject) {
-
-                return (
-                    subject !== null &&
-                    subject !== undefined
-                );
-            })
-            .map(function (subject, index) {
-
-                if (
-                    subject &&
-                    typeof subject === "object"
-                ) {
-
-                    return subject;
-                }
-
-
-                return {
-                    _subjectKey:
-                        "Subject " +
-                        (index + 1),
-
-                    marksSecured:
-                        subject
-                };
-            });
-    }
-
-
-    /*
-       -----------------------------------------------------
-       FORMAT 2 — State Board style
-
-       subjects: {
-
-           firstLanguage: {
-               name: "TELUGU",
-               marksSecured: "90"
-           },
-
-           mathematics: {
-               marksSecured: "92"
-           }
-       }
-       -----------------------------------------------------
-    */
-
-    if (
-        subjects &&
-        typeof subjects === "object"
-    ) {
-
-        return Object.entries(subjects)
-            .map(
-                function (
-                    [subjectKey, subjectData]
-                ) {
-
-                    if (
-                        subjectData &&
-                        typeof subjectData ===
-                            "object" &&
-                        !Array.isArray(
-                            subjectData
-                        )
-                    ) {
-
-                        return {
-                            _subjectKey:
-                                subjectKey,
-
-                            ...subjectData
-                        };
-                    }
-
-
-                    return {
-
-                        _subjectKey:
-                            subjectKey,
-
-                        marksSecured:
-                            subjectData
-                    };
-                }
-            );
-    }
-
-
-    return [];
-}
-
-
-// =========================================================
-// FIND FIRST MATCHING VALUE
-// =========================================================
-
-function findFirstValue(
-    object,
-    keys
-) {
-
-    for (const key of keys) {
-
-        if (
-            hasUsableValue(
-                object[key]
-            )
-        ) {
-
-            return object[key];
-        }
-    }
-
-
-    return null;
-}
-
-
-// =========================================================
-// CHECK VALUE
-// =========================================================
-
-function hasUsableValue(value) {
+function hasValue(value) {
 
     return (
         value !== undefined &&
@@ -1438,8 +1199,38 @@ function hasUsableValue(value) {
 }
 
 
+function formatTableValue(value) {
+
+    if (!hasValue(value)) {
+        return "—";
+    }
+
+    if (Array.isArray(value)) {
+        return value.join(", ");
+    }
+
+    if (typeof value === "object") {
+        return JSON.stringify(value);
+    }
+
+    return String(value);
+}
+
+
 // =========================================================
-// FORMAT FIELD NAME
+// NORMALIZE KEY
+// =========================================================
+
+function normalizeKey(value) {
+
+    return String(value)
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "");
+}
+
+
+// =========================================================
+// FORMAT FIELD LABEL
 // =========================================================
 
 function formatFieldName(name) {
@@ -1455,10 +1246,8 @@ function formatFieldName(name) {
 
         .replace(
             /\b\w/g,
-            function (letter) {
-
-                return letter.toUpperCase();
-            }
+            letter =>
+                letter.toUpperCase()
         );
 }
 
@@ -1467,60 +1256,43 @@ function formatFieldName(name) {
 // DOWNLOAD JSON
 // =========================================================
 
-downloadBtn.addEventListener(
-    "click",
-    function () {
+downloadBtn.addEventListener("click", () => {
 
-        if (!latestResult) {
-            return;
-        }
+    if (!latestResult) {
+        return;
+    }
 
-
-        const json =
-            JSON.stringify(
-                latestResult,
-                null,
-                2
-            );
-
-
-        const blob =
-            new Blob(
-                [json],
-                {
-                    type:
-                        "application/json"
-                }
-            );
-
-
-        const url =
-            URL.createObjectURL(
-                blob
-            );
-
-
-        const link =
-            document.createElement("a");
-
-
-        link.href =
-            url;
-
-
-        link.download =
-            "document-analysis.json";
-
-
-        document.body.appendChild(
-            link
+    const json =
+        JSON.stringify(
+            latestResult,
+            null,
+            2
         );
 
+    const blob =
+        new Blob(
+            [json],
+            {
+                type: "application/json"
+            }
+        );
 
-        link.click();
+    const url =
+        URL.createObjectURL(blob);
 
-        link.remove();
+    const link =
+        document.createElement("a");
 
-        URL.revokeObjectURL(url);
-    }
-);
+    link.href = url;
+
+    link.download =
+        "document-analysis.json";
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    link.remove();
+
+    URL.revokeObjectURL(url);
+});
